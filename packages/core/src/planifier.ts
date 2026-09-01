@@ -224,9 +224,9 @@ export function planifier(
 /**
  * Date de la dernière exécution RÉELLE d'une tâche : dernière instance en
  * statut `faite` dans une intervention non annulée. `partielle` ne compte pas
- * (DECISIONS.md).
+ * (DECISIONS.md). Exportée pour la vue « dernière exécution » (SPEC §7).
  */
-function dateDerniereExecution(
+export function dateDerniereExecution(
   defId: string,
   passeChronologique: InterventionHistorique[],
 ): DateISO | null {
@@ -245,7 +245,7 @@ function dateDerniereExecution(
 }
 
 /** Dernière cible réellement traitée (`faite`) d'une tâche à cible rotative. */
-function derniereCibleTraitee(
+export function derniereCibleTraitee(
   defId: string,
   passeChronologique: InterventionHistorique[],
 ): string | null {
