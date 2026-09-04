@@ -1,0 +1,85 @@
+{
+  "commun": {
+    "chargement": "Chargement…",
+    "erreurReseau": "Le serveur ne répond pas. Vérifier le Wi-Fi puis réessayer.",
+    "reessayer": "Réessayer",
+    "annuler": "Annuler",
+    "valider": "Valider",
+    "envoyer": "Envoyer",
+    "fermer": "Fermer"
+  },
+  "typePassage": {
+    "A": "Passage 1 — zone jour, bureaux, salle de bain",
+    "B": "Passage 2 — chambres et salle de douche",
+    "exceptionnelle": "Intervention exceptionnelle"
+  },
+  "accueil": {
+    "aucuneIntervention": "Aucune intervention prévue aujourd'hui.",
+    "prochaine": "Prochaine intervention : {{date}}",
+    "commencer": "Commencer",
+    "reprendre": "Reprendre l'intervention",
+    "terminee": "Intervention terminée. Merci !",
+    "messagesTitre": "Mot des employeurs"
+  },
+  "plan": {
+    "progression": "{{traitees}} sur {{total}}",
+    "cloturer": "Récapitulatif et clôture",
+    "ajouterTache": "Ajouter une tâche",
+    "reporteeDepuis": "Reportée depuis le {{date}}",
+    "demande": "Demande",
+    "transverses": "Pour finir",
+    "statutFaite": "Fait",
+    "statutPartielle": "Fait en partie",
+    "statutNonFaite": "Pas fait",
+    "ouvrirDetail": "Voir le détail de « {{tache}} »",
+    "ouvrirMotifs": "Je n'ai pas pu faire « {{tache}} »",
+    "basculer": "Cocher « {{tache}} »"
+  },
+  "motifs": {
+    "sousTitre": "Qu'est-ce qui s'est passé ?",
+    "statutNonFaite": "Pas fait",
+    "statutPartielle": "Fait en partie",
+    "manque_de_temps": "Manque de temps",
+    "piece_inaccessible": "Pièce inaccessible",
+    "produit_manquant": "Produit manquant",
+    "non_necessaire": "Pas nécessaire",
+    "autre": "Autre",
+    "commentaire": "Commentaire (facultatif)",
+    "remettreAFaire": "Remettre à faire"
+  },
+  "ajout": {
+    "titre": "Ajouter une tâche",
+    "placeholder": "Ex. : arroser les plantes de la terrasse",
+    "ajouter": "Ajouter"
+  },
+  "cloture": {
+    "titre": "Récapitulatif",
+    "faites_one": "{{count}} tâche faite",
+    "faites_other": "{{count}} tâches faites",
+    "partielles_one": "{{count}} tâche faite en partie",
+    "partielles_other": "{{count}} tâches faites en partie",
+    "nonFaites_one": "{{count}} tâche pas faite",
+    "nonFaites_other": "{{count}} tâches pas faites",
+    "nonCochees_one": "{{count}} tâche restée non cochée",
+    "nonCochees_other": "{{count}} tâches restées non cochées",
+    "sansMotif": "Sans motif",
+    "note": "Un mot pour les employeurs ? (facultatif)",
+    "terminer": "Terminer l'intervention",
+    "retourPlan": "Revenir au plan"
+  },
+  "terminee": {
+    "titre": "Intervention clôturée",
+    "merci": "Merci, et à la prochaine fois !",
+    "retour": "Retour à l'accueil"
+  },
+  "signaler": {
+    "bouton": "Signaler",
+    "titre": "Signaler…",
+    "casse": "Une casse",
+    "produit_a_racheter": "Un produit à racheter",
+    "probleme_technique": "Un problème technique",
+    "autre": "Autre chose",
+    "placeholder": "Décrire en quelques mots…",
+    "envoye": "Signalement envoyé."
+  }
+}

@@ -45,6 +45,17 @@ Les autres pièces sont inchangées. Toute référence de la SPEC à « salon + 
 - **Clôture** : les instances restées `a_faire` passent à `non_faite` avec motif nul (« non renseigné »). Sans motif temps/accès, elles ne sont pas repêchées — cohérent avec la validation déclarative non contestée (SPEC §1).
 - **Demandes ponctuelles** : le filtrage « rattachées à cette intervention ou marquées prochaine » est fait par l'appelant (le serveur) ; le moteur injecte ce qu'on lui donne. Une demande arrivée après la génération du plan est ajoutée au plan existant au prochain chargement.
 
+## Lot 2 — interface tablette (choix d'implémentation)
+
+- **Authentification reportée au lot 3** : le PIN tablette (SPEC §2/§9) et les comptes employeurs seront implémentés ensemble, côté serveur. Pendant les lots 1-2, l'API et l'interface ne sont exposées que sur le réseau local du foyer ; l'accès distant (Tailscale) arrive au lot 4.
+- **Menu « je n'ai pas pu faire »** : ouvert par une icône dédiée (✋) plutôt qu'un appui long — la spec propose l'un ou l'autre, l'icône est plus découvrable et évite les conflits tactiles. Le menu impose un motif (c'est sa raison d'être : le repêchage en dépend) et propose « Pas fait » / « Fait en partie » ainsi qu'un commentaire facultatif.
+- **Cartes de pièce dépliées par défaut** : l'intervenante voit tout le plan sans un tap ; chaque carte reste repliable.
+- **Basculer une ligne** : un tap passe la tâche à `faite` (depuis n'importe quel état), un tap sur une tâche faite la remet `a_faire` ; les états fins passent par le menu motifs.
+- **Ajout spontané** : bouton « + Ajouter une tâche » en fin de plan (libellé libre, sans pièce) — le modèle le prévoyait (`origine: ajout_spontane`), l'écran reste minimal.
+- **Écran maintenu allumé** : Wake Lock API quand l'intervention est `en_cours` ; le mode kiosque du lot 4 (tablette branchée secteur) prendra le relais.
+- **Servir l'interface** : le serveur sert `packages/tablette/dist` quand il existe (même origine pour l'app et l'API) ; en développement, Vite proxifie `/api` vers `:3000`.
+- Le hors ligne (file d'écritures, PWA) reste au lot 4 : toute la conversation réseau est déjà isolée dans `packages/tablette/src/api.ts` pour s'y insérer sans toucher aux écrans.
+
 ## Divers
 
 - Le mode « travaux » actuel (salle à manger + salon condamnés, SPEC §3.1) est appliqué par le seed comme une période d'inactivité ouverte débutant au 2026-08-01 (constante `TRAVAUX_EN_COURS` de la configuration). Réactivation via l'API (`fin` posée) ou, plus tard, l'espace employeur.

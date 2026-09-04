@@ -7,7 +7,8 @@ Application de suivi des interventions ménagères d'un foyer. **La source de v�
 Monorepo npm workspaces :
 
 - `packages/core` — domaine pur : schémas Zod, catalogue initial (seed), configuration du foyer, **moteur de planification** (`src/planifier.ts`, fonction pure sans I/O — ne jamais y introduire d'accès base, d'horloge ou de réseau) et génération du calendrier. Toute la logique métier testable vit ici.
-- `packages/server` — API HTTP (Hono), persistance SQLite (better-sqlite3 + Drizzle), seed exécutable.
+- `packages/server` — API HTTP (Hono), persistance SQLite (better-sqlite3 + Drizzle), seed exécutable. Sert aussi le build de la tablette (`packages/tablette/dist`) quand il existe.
+- `packages/tablette` — interface tablette (React + Vite + Tailwind + TanStack Query + i18next). Réseau isolé dans `src/api.ts` (le hors ligne du lot 4 s'y branchera), logique d'affichage pure dans `src/lib.ts` (testée), chaînes toutes extraites dans `src/locales/fr.json`.
 
 ## Points d'attention
 
@@ -20,13 +21,16 @@ Monorepo npm workspaces :
 
 ```
 npm install            # à la racine
-npm test               # tests de tous les workspaces (moteur + intégration API)
+npm test               # tests de tous les workspaces (moteur + intégration API + lib tablette)
 npm run typecheck
 npm run db:seed        # crée data/housekeeping.db et charge le catalogue (--reset pour repartir de zéro)
-npm run dev            # démarre l'API sur :3000
+npm run dev            # démarre l'API sur :3000 (sert aussi packages/tablette/dist s'il existe)
+npm run dev:tablette   # Vite en développement (proxy /api vers :3000)
+npm run build          # build de la tablette
 ```
 
 ## Avancement
 
-- **Lot 1 livré** : modèle de données, seed, moteur `planifier()` + tests, API. Aucun écran (conforme SPEC §11).
-- Lots 2 à 4 (tablette, espace employeur, hors ligne/PWA/i18n/kiosque) : à venir, cf. SPEC §11. L'authentification (PIN tablette, identifiants employeurs) arrive avec les lots 2/3.
+- **Lot 1 livré** : modèle de données, seed, moteur `planifier()` + tests, API.
+- **Lot 2 livré** : interface tablette — accueil, plan du jour par cartes de pièce, validation avec motifs, ajout spontané, clôture, bouton « Signaler », écran maintenu allumé, i18next (fr).
+- Lot 3 (espace employeur + authentification PIN/identifiants) et lot 4 (hors ligne, PWA, kiosque) : à venir, cf. SPEC §11.

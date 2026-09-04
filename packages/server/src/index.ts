@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { serve } from '@hono/node-server'
 import { creerApp } from './app.js'
 import { CHEMIN_BASE_DEFAUT, ouvrirBase } from './db/client.js'
@@ -10,7 +11,10 @@ if (!baseDejaPeuplee(db)) {
   )
 }
 
+const dossierTablette = fileURLToPath(new URL('../../tablette/dist', import.meta.url))
+const app = creerApp(db, { dossierStatique: dossierTablette })
+
 const port = Number(process.env.PORT ?? 3000)
-serve({ fetch: creerApp(db).fetch, port }, (info) => {
+serve({ fetch: app.fetch, port }, (info) => {
   console.log(`API Housekeeping sur http://localhost:${info.port} (base : ${CHEMIN_BASE_DEFAUT})`)
 })

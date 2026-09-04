@@ -1,0 +1,23 @@
+@import 'tailwindcss';
+
+/*
+ * Contraintes d'ergonomie (SPEC §6) : typographie de 18 px minimum — la base
+ * rem est donc portée à 18 px, toutes les tailles Tailwind suivent. Cibles
+ * tactiles ≥ 56 px (h-14/min-h-14 dans les composants), aucun scroll
+ * horizontal, aucune interaction dépendant du survol.
+ */
+html {
+  font-size: 18px;
+}
+
+html,
+body {
+  overscroll-behavior-y: none;
+  overflow-x: hidden;
+  background-color: var(--color-slate-100);
+}
+
+/* Décoche le surlignage tactile bleu par défaut, les états sont dessinés. */
+button {
+  -webkit-tap-highlight-color: transparent;
+}
