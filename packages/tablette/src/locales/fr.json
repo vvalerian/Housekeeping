@@ -72,6 +72,16 @@
     "merci": "Merci, et à la prochaine fois !",
     "retour": "Retour à l'accueil"
   },
+  "pin": {
+    "titre": "Code d'accès",
+    "sousTitre": "Saisir le code à 4 chiffres",
+    "effacer": "Effacer",
+    "erreur": "Code incorrect, réessayer.",
+    "verrou": "Trop de tentatives — réessayer dans quelques minutes.",
+    "nonConfigure": "L'accès de la tablette n'est pas encore configuré. Demandez aux employeurs de définir le code dans l'espace employeur (page Sécurité).",
+    "verifier": "Vérifier à nouveau",
+    "connexion": "Connexion…"
+  },
   "signaler": {
     "bouton": "Signaler",
     "titre": "Signaler…",

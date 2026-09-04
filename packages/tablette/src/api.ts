@@ -17,12 +17,21 @@ import type {
   TypeSignalement,
 } from './types.js'
 
+export class ErreurApi extends Error {
+  constructor(
+    public statut: number,
+    chemin: string,
+  ) {
+    super(`API ${statut} sur ${chemin}`)
+  }
+}
+
 async function requete<T>(chemin: string, options: RequestInit = {}): Promise<T> {
   const reponse = await fetch(`/api${chemin}`, {
     ...options,
     headers: options.body === undefined ? undefined : { 'content-type': 'application/json' },
   })
-  if (!reponse.ok) throw new Error(`API ${reponse.status} sur ${chemin}`)
+  if (!reponse.ok) throw new ErreurApi(reponse.status, chemin)
   return reponse.json() as Promise<T>
 }
 
@@ -30,17 +39,46 @@ async function requete<T>(chemin: string, options: RequestInit = {}): Promise<T>
 async function requeteOptionnelle<T>(chemin: string): Promise<T | null> {
   const reponse = await fetch(`/api${chemin}`)
   if (reponse.status === 404) return null
-  if (!reponse.ok) throw new Error(`API ${reponse.status} sur ${chemin}`)
+  if (!reponse.ok) throw new ErreurApi(reponse.status, chemin)
   return reponse.json() as Promise<T>
+}
+
+// --- Authentification (lot 3) ----------------------------------------------
+
+export interface EtatAuthDto {
+  initialisation_requise: boolean
+  acteur: 'employeur' | 'tablette' | null
+  pin: 'non_configure' | 'requis' | 'desactive'
+}
+
+export function useEtatAuth() {
+  return useQuery({
+    queryKey: ['auth'],
+    queryFn: () => requete<EtatAuthDto>('/auth/etat'),
+    refetchInterval: 60_000,
+  })
+}
+
+export function useConnexionPin() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (pin: string | null) =>
+      requete<{ ok: true }>('/auth/pin', {
+        method: 'POST',
+        body: JSON.stringify(pin === null ? {} : { pin }),
+      }),
+    onSuccess: () => client.invalidateQueries(),
+  })
 }
 
 const CLE_DU_JOUR = ['du-jour'] as const
 
-export function useDuJour() {
+export function useDuJour(actif = true) {
   return useQuery({
     queryKey: CLE_DU_JOUR,
     queryFn: () => requeteOptionnelle<PlanDuJourDto>(`/interventions/du-jour?date=${dateDuJour()}`),
     refetchInterval: 60_000,
+    enabled: actif,
   })
 }
 

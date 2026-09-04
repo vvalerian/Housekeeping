@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useDuJour } from './api.js'
+import { ErreurApi, useDuJour, useEtatAuth } from './api.js'
 import { BoutonSignaler } from './composants/BoutonSignaler.js'
 import { Accueil } from './ecrans/Accueil.js'
 import { Cloture } from './ecrans/Cloture.js'
+import { Pin } from './ecrans/Pin.js'
 import { PlanDuJour } from './ecrans/PlanDuJour.js'
 import { useEcranAllume } from './wakeLock.js'
 
@@ -11,7 +12,9 @@ type Vue = 'accueil' | 'plan' | 'cloture' | 'terminee'
 
 export default function App() {
   const { t } = useTranslation()
-  const duJour = useDuJour()
+  const etatAuth = useEtatAuth()
+  const authentifie = etatAuth.data !== undefined && etatAuth.data.acteur !== null
+  const duJour = useDuJour(authentifie)
   const [vue, setVue] = useState<Vue>('accueil')
   const plan = duJour.data ?? null
 
@@ -22,6 +25,12 @@ export default function App() {
   useEffect(() => {
     if (plan === null && vue !== 'accueil') setVue('accueil')
   }, [plan, vue])
+
+  // Session absente ou expirée en cours d'usage : verrou PIN (SPEC §2).
+  const sessionPerdue = duJour.error instanceof ErreurApi && duJour.error.statut === 401
+  if (etatAuth.data !== undefined && (!authentifie || sessionPerdue)) {
+    return <Pin etat={etatAuth.data.pin} />
+  }
 
   const ecran = () => {
     if (vue === 'plan' && plan !== null) {

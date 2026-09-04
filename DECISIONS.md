@@ -56,13 +56,23 @@ Les autres pièces sont inchangées. Toute référence de la SPEC à « salon + 
 - **Servir l'interface** : le serveur sert `packages/tablette/dist` quand il existe (même origine pour l'app et l'API) ; en développement, Vite proxifie `/api` vers `:3000`.
 - Le hors ligne (file d'écritures, PWA) reste au lot 4 : toute la conversation réseau est déjà isolée dans `packages/tablette/src/api.ts` pour s'y insérer sans toucher aux écrans.
 
+## Lot 3 — espace employeur et authentification (choix d'implémentation)
+
+- **Sessions** : cookie HttpOnly `hk_session` portant un jeton stocké en base — 30 jours pour un employeur, 365 jours pour la tablette (le cookie est le « jeton lié à l'appareil » de SPEC §9). Hachage scrypt natif (pas de dépendance), verrou anti-force brute en mémoire (10 échecs / 15 min).
+- **PIN tablette** (SPEC §2) : trois états gérés par les employeurs (page Sécurité) — *non configuré* (la tablette est bloquée, défaut sûr au premier démarrage), *requis* (code à 4 chiffres) ou *désactivé* (accès tablette sans code, choix explicite et assumé — à réserver à un usage LAN/kiosque).
+- **Premier compte** : créé via l'écran d'initialisation de `/admin`, ouvert uniquement tant qu'aucun compte n'existe. En production, cette fenêtre est couverte par le Basic Auth nginx — le retirer seulement après (cf. deploy/README.md).
+- **Cloisonnement** : la session tablette accède au plan du jour, aux validations, signalements, produits (niveau) et messages ; toute la configuration (pièces, tâches, calendrier, demandes, réponses aux signalements, création de produits, sécurité) exige une session employeur (403 sinon).
+- **Espace employeur en français en dur** : l'exigence i18next de SPEC §6 vise l'interface de l'intervenante (tablette) ; l'espace employeur est l'outil personnel d'un foyer francophone.
+- La `cible_rotative` d'une tâche s'affiche dans l'UI mais ne s'y édite pas (structure fine, cas rare) — modifiable via l'API.
+- L'ouverture du détail d'une intervention planifiée depuis l'espace employeur génère son plan (même chemin que la tablette) : c'est une prévisualisation fidèle, assumée.
+
 ## Exposition publique (2026-09-07, demande des employeurs)
 
 L'application est publiée sur `https://housekeeping.vv-architech.fr` derrière le nginx du foyer — c'est une divergence assumée avec SPEC §9, qui recommandait un accès distant via Tailscale sans ouverture de port. Garde-fous (cf. `deploy/`) :
 
 - le conteneur n'écoute que sur `127.0.0.1:3000` (jamais exposé directement) ;
 - TLS Let's Encrypt, redirection 80 → 443 ;
-- **Basic Auth nginx transitoire et obligatoire** tant que l'application n'a pas sa propre authentification — à retirer au déploiement du lot 3 (PIN tablette + comptes employeurs) ;
+- **Basic Auth nginx transitoire** : obligatoire jusqu'au déploiement du lot 3 ; une fois le premier compte employeur créé via `/admin`, l'authentification applicative prend le relais et le Basic Auth se retire (procédure dans deploy/README.md) ;
 - sauvegarde quotidienne à chaud (`db:backup`, rétention 30 j) branchée sur cron, conformément à SPEC §8.
 
 ## Divers

@@ -23,7 +23,8 @@ npm run dev           # API sur http://localhost:3000
 |---|---|
 | `packages/core` | Domaine pur : schémas Zod, catalogue, configuration du foyer, moteur `planifier()` et calendrier — testés unitairement, sans I/O. |
 | `packages/server` | API HTTP (Hono) + SQLite (better-sqlite3 / Drizzle), seed exécutable ; sert le build de la tablette. |
-| `packages/tablette` | Interface tablette (React + Vite + Tailwind + TanStack Query + i18next) : accueil, plan du jour, validation, clôture, signalements. |
+| `packages/tablette` | Interface tablette (React + Vite + Tailwind + TanStack Query + i18next) : accueil, plan du jour, validation, clôture, signalements, verrou PIN. |
+| `packages/employeur` | Espace employeur servi sous `/admin` : calendrier, rotations, configuration, mode travaux, demandes, signalements, messages, produits, sécurité. |
 
 Les quatre questions ouvertes de la spec (draps, rotation des vitres, jours
 d'intervention, langue de l'intervenante) sont **tranchées** et regroupées dans
@@ -33,4 +34,4 @@ et le jeudi, français uniquement.
 
 **Déploiement** : conteneur Docker derrière nginx (TLS + Basic Auth transitoire) — voir [deploy/README.md](deploy/README.md).
 
-État : **lots 1 et 2 livrés** (modèle, seed, moteur testé, API, interface tablette). Lots suivants : cf. [SPEC.md](SPEC.md) §11.
+État : **lots 1 à 3 livrés** (modèle, seed, moteur testé, API, interface tablette, espace employeur, authentification). Reste le lot 4 : cf. [SPEC.md](SPEC.md) §11.
