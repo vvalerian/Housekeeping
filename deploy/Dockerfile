@@ -9,6 +9,7 @@ COPY package.json package-lock.json ./
 COPY packages/core/package.json packages/core/
 COPY packages/server/package.json packages/server/
 COPY packages/tablette/package.json packages/tablette/
+COPY packages/employeur/package.json packages/employeur/
 RUN npm ci
 COPY . .
 RUN npm run build
@@ -25,6 +26,7 @@ COPY package.json package-lock.json ./
 COPY packages/core/package.json packages/core/
 COPY packages/server/package.json packages/server/
 COPY packages/tablette/package.json packages/tablette/
+COPY packages/employeur/package.json packages/employeur/
 RUN npm ci --omit=dev
 
 # --- Étape 3 : image finale -------------------------------------------------
@@ -38,6 +40,7 @@ COPY package.json ./
 COPY packages/core ./packages/core
 COPY packages/server ./packages/server
 COPY --from=build /app/packages/tablette/dist ./packages/tablette/dist
+COPY --from=build /app/packages/employeur/dist ./packages/employeur/dist
 COPY deploy/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh && mkdir -p /data && chown node:node /data /app
 USER node
