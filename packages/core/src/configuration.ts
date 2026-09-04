@@ -5,9 +5,9 @@
  *
  * Tout ce qui est réglable sans toucher au code métier vit ici : les paramètres
  * du moteur de planification, l'ordre des pièces, les jours d'intervention et
- * les quatre questions ouvertes de la spec. Le moteur (`planifier.ts`) reçoit
- * ces valeurs en entrée et n'importe jamais ce fichier : les tests lui passent
- * leurs propres réglages.
+ * les choix propres au foyer. Le moteur (`planifier.ts`) reçoit ces valeurs en
+ * entrée et n'importe jamais ce fichier : les tests lui passent leurs propres
+ * réglages.
  */
 import type { JourSemaine } from './dates.js'
 import type { ParametresPlanification } from './domaine.js'
@@ -44,16 +44,24 @@ export const PARAMETRES_PLANIFICATION: ParametresPlanification = {
  * Ordre d'affichage des pièces (cartes de l'écran tablette, groupement du plan).
  * Le seed en dérive `ordre_affichage` ((index + 1) × 10) ; modifiable ensuite
  * pièce par pièce depuis l'espace employeur.
+ *
+ * Terminologie du foyer (précisée le 2026-09-04, cf. DECISIONS.md) : la
+ * « salle à manger » est la grande pièce de 24 m² entre la cuisine et le salon
+ * (la SPEC l'appelait « Salon ») ; le « salon » est l'espace de 12 m² avec le
+ * canapé et l'étendoir (la SPEC l'appelait « Pièce attenante ») ; l'« atelier »
+ * est la pièce de 17 m² de Madame, qui contient son poste de télétravail (la
+ * SPEC l'appelait « Bureau de Madame ») ; le « bureau » est celui de Monsieur
+ * (9 m²).
  */
 export const ORDRE_PIECES = [
   'cuisine',
+  'salle_a_manger',
   'salon',
-  'piece_attenante',
   'couloir',
   'entree_1',
   'entree_2',
-  'bureau_madame',
-  'bureau_monsieur',
+  'atelier',
+  'bureau',
   'salle_de_bain',
   'wc_salle_de_bain',
   'salle_de_douche',
@@ -65,63 +73,58 @@ export const ORDRE_PIECES = [
 
 /**
  * ============================================================================
- * QUESTIONS OUVERTES (SPEC §12) — VALEURS PAR DÉFAUT PROVISOIRES, NON VALIDÉES
+ * CHOIX DU FOYER — les quatre questions ouvertes de SPEC §12, TRANCHÉES
+ * le 2026-09-04 par les employeurs (draps, vitres, jours, langue).
  * ============================================================================
- *
- * La spec demande de trancher ces quatre points avec les employeurs et
- * l'intervenante AVANT la mise en service. Les valeurs ci-dessous sont des
- * défauts raisonnables pour développer et tester ; elles sont volontairement
- * regroupées ici pour être introuvables nulle part ailleurs dans le code.
- * Voir DECISIONS.md.
  */
-export const A_CONFIRMER = {
+export const CHOIX_FOYER = {
   /**
-   * 1) Cible de rotation du changement des draps (SPEC §4.4).
-   *    - 'ensemble_des_lits'    : tous les lits en une fois, une fois par mois
-   *                               (défaut suggéré par la spec) ;
-   *    - 'rotation_par_chambre' : une chambre différente à chaque occurrence.
+   * 1) Cible du changement des draps (SPEC §4.4) : tous les lits en une fois,
+   *    une fois par mois, sur un passage B. L'alternative 'rotation_par_chambre'
+   *    reste implémentée si le foyer change d'avis.
    */
   cible_rotation_draps: 'ensemble_des_lits' as 'ensemble_des_lits' | 'rotation_par_chambre',
 
   /**
-   * 2) Pièces incluses dans la rotation mensuelle des vitres (SPEC §4.4).
-   *    Défaut : pièces de vie ; sanitaires et circulations exclus. À VALIDER.
+   * 2) Pièces incluses dans la rotation mensuelle des vitres (SPEC §4.4) :
+   *    atelier, bureau, les trois chambres, cuisine, salon, salle à manger.
    */
   pieces_rotation_vitres: [
     'cuisine',
+    'salle_a_manger',
     'salon',
-    'piece_attenante',
-    'bureau_madame',
-    'bureau_monsieur',
+    'atelier',
+    'bureau',
     'chambre_enfant_1',
     'chambre_enfant_2',
     'chambre_parents',
   ] as string[],
 
   /**
-   * 3) Jours d'intervention hebdomadaires (SPEC §5, génération du calendrier).
-   *    Défaut : mardi (passage A) et vendredi (passage B). À VALIDER.
+   * 3) Jours d'intervention hebdomadaires (SPEC §5, génération du calendrier) :
+   *    lundi et jeudi. Le type (A/B) découle de l'alternance stricte.
    */
-  jours_intervention: ['mardi', 'vendredi'] as JourSemaine[],
+  jours_intervention: ['lundi', 'jeudi'] as JourSemaine[],
 
   /** Type du tout premier passage si l'historique est vide. */
   premier_type_passage: 'A' as 'A' | 'B',
 
   /**
-   * 4) Langue(s) de l'intervenante (SPEC §6). L'UI (lot 2) chargera i18next
-   *    avec ces locales ; la seconde langue est À CONFIRMER avant de figer l'UI.
+   * 4) Langue de l'intervenante (SPEC §6) : français uniquement — pas de
+   *    seconde langue à prévoir. i18next reste introduit au lot 2 pour
+   *    l'extraction des chaînes (exigence SPEC §6), avec la seule locale fr.
    */
   langues: ['fr'] as string[],
 }
 
 /**
- * Travaux en cours à la mise en service (SPEC §3.1 : salon et pièce attenante
- * « condamnés pendant les travaux »). Le seed pose sur ces pièces une période
- * d'inactivité ouverte ; la réactivation se fait via l'API (ou l'espace
- * employeur, lot 3) en fixant `fin`.
+ * Travaux en cours à la mise en service (SPEC §3.1 : la grande pièce et le
+ * salon « condamnés pendant les travaux » — ils fusionneront à terme). Le seed
+ * pose sur ces pièces une période d'inactivité ouverte ; la réactivation se
+ * fait via l'API (ou l'espace employeur, lot 3) en fixant `fin`.
  */
 export const TRAVAUX_EN_COURS = {
-  piece_ids: ['salon', 'piece_attenante'] as string[],
+  piece_ids: ['salle_a_manger', 'salon'] as string[],
   debut: '2026-08-01',
   motif: 'Travaux — pièce condamnée',
 }

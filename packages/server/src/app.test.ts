@@ -32,9 +32,10 @@ beforeAll(() => {
   }
 })
 
-// 2026-09-01 est un mardi ; jours d'intervention par défaut : mardi et vendredi.
+// Jours d'intervention du foyer : lundi et jeudi. Dans la fenêtre testée,
+// 2026-09-03 est un jeudi et 2026-09-07 un lundi.
 describe('API — scénario de bout en bout', () => {
-  let idMardi = ''
+  let idJeudi = ''
   let idInstancePoubelles = ''
   let idInstanceVitres = ''
 
@@ -42,10 +43,12 @@ describe('API — scénario de bout en bout', () => {
     const pieces = await appel('GET', '/api/pieces')
     expect(pieces.statut).toBe(200)
     expect(pieces.corps).toHaveLength(15)
-    const salon = pieces.corps.find((p: { id: string }) => p.id === 'salon')
-    expect(salon.periodes_inactivite).toEqual([
-      { debut: '2026-08-01', fin: null, motif: expect.stringContaining('Travaux') },
-    ])
+    for (const id of ['salle_a_manger', 'salon']) {
+      const piece = pieces.corps.find((p: { id: string }) => p.id === id)
+      expect(piece.periodes_inactivite, id).toEqual([
+        { debut: '2026-08-01', fin: null, motif: expect.stringContaining('Travaux') },
+      ])
+    }
     const taches = await appel('GET', '/api/taches')
     expect(taches.corps).toHaveLength(25) // 5 + 6 + 6 + 4 + 4 (SPEC §4)
   })
@@ -59,10 +62,9 @@ describe('API — scénario de bout en bout', () => {
     expect(
       reponse.corps.map((i: { date: string; type: string }) => [i.date, i.type]),
     ).toEqual([
-      ['2026-09-01', 'A'],
-      ['2026-09-04', 'B'],
-      ['2026-09-08', 'A'],
-      ['2026-09-11', 'B'],
+      ['2026-09-03', 'A'],
+      ['2026-09-07', 'B'],
+      ['2026-09-10', 'A'],
     ])
     // Relancer la génération sur la même fenêtre ne crée pas de doublon.
     const rejouee = await appel('POST', '/api/calendrier/generer', {
@@ -73,10 +75,10 @@ describe('API — scénario de bout en bout', () => {
   })
 
   it('sert le plan du jour de la tablette, généré à la première consultation', async () => {
-    const reponse = await appel('GET', '/api/interventions/du-jour?date=2026-09-01')
+    const reponse = await appel('GET', '/api/interventions/du-jour?date=2026-09-03')
     expect(reponse.statut).toBe(200)
     expect(reponse.corps.intervention.type).toBe('A')
-    idMardi = reponse.corps.intervention.id
+    idJeudi = reponse.corps.intervention.id
 
     const instances: {
       id: string
@@ -90,8 +92,8 @@ describe('API — scénario de bout en bout', () => {
     for (const attendu of ['cuisine_nettoyage', 'salle_de_bain_complet', 'poubelles', 'linge']) {
       expect(parDef(attendu), attendu).toBeDefined()
     }
-    // Pièces condamnées par les travaux : le canapé (pièce attenante) est
-    // écarté, la rotation des vitres saute salon et pièce attenante.
+    // Pièces condamnées par les travaux : le canapé (salon) est écarté, la
+    // rotation des vitres saute la salle à manger et le salon.
     expect(parDef('aspiration_canape')).toBeUndefined()
     const vitres = parDef('vitres')
     expect(vitres).toBeDefined()
@@ -100,7 +102,7 @@ describe('API — scénario de bout en bout', () => {
     idInstancePoubelles = parDef('poubelles')!.id
 
     // Une seconde consultation ne régénère rien.
-    const relecture = await appel('GET', '/api/interventions/du-jour?date=2026-09-01')
+    const relecture = await appel('GET', '/api/interventions/du-jour?date=2026-09-03')
     expect(relecture.corps.instances).toHaveLength(instances.length)
   })
 
@@ -109,7 +111,7 @@ describe('API — scénario de bout en bout', () => {
       texte: 'Nettoyer la cage du hamster',
     })
     expect(creation.statut).toBe(201)
-    const plan = await appel('GET', '/api/interventions/du-jour?date=2026-09-01')
+    const plan = await appel('GET', '/api/interventions/du-jour?date=2026-09-03')
     const ponctuelle = plan.corps.instances.find(
       (i: { origine: string }) => i.origine === 'ponctuelle',
     )
@@ -119,7 +121,7 @@ describe('API — scénario de bout en bout', () => {
   })
 
   it('démarrage, validation des tâches puis clôture', async () => {
-    const demarrage = await appel('POST', `/api/interventions/${idMardi}/demarrer`)
+    const demarrage = await appel('POST', `/api/interventions/${idJeudi}/demarrer`)
     expect(demarrage.corps.intervention.statut).toBe('en_cours')
     expect(demarrage.corps.intervention.heure_debut).not.toBeNull()
 
@@ -136,7 +138,7 @@ describe('API — scénario de bout en bout', () => {
     })
     expect(poubellesReportees.corps.motif_non_faite).toBe('manque_de_temps')
 
-    const cloture = await appel('POST', `/api/interventions/${idMardi}/cloturer`, {
+    const cloture = await appel('POST', `/api/interventions/${idJeudi}/cloturer`, {
       note_intervenante: 'RAS, produit sol bientôt fini',
     })
     expect(cloture.statut).toBe(200)
@@ -153,8 +155,8 @@ describe('API — scénario de bout en bout', () => {
     expect(sansMotif.motif_non_faite).toBeNull()
   })
 
-  it('le vendredi hérite du repêchage, pas des tâches sans motif', async () => {
-    const reponse = await appel('GET', '/api/interventions/du-jour?date=2026-09-04')
+  it('le lundi suivant hérite du repêchage, pas des tâches sans motif', async () => {
+    const reponse = await appel('GET', '/api/interventions/du-jour?date=2026-09-07')
     expect(reponse.corps.intervention.type).toBe('B')
     const instances: {
       task_definition_id: string | null
@@ -165,7 +167,7 @@ describe('API — scénario de bout en bout', () => {
 
     const poubelles = instances.filter((i) => i.task_definition_id === 'poubelles')
     expect(poubelles).toHaveLength(1)
-    expect(poubelles[0]!.reportee_depuis).toBe('2026-09-01')
+    expect(poubelles[0]!.reportee_depuis).toBe('2026-09-03')
 
     // Non faite sans motif → pas de bandeau ; demande déjà injectée → pas de retour.
     const cuisine = instances.find((i) => i.task_definition_id === 'cuisine_nettoyage')
@@ -178,7 +180,7 @@ describe('API — scénario de bout en bout', () => {
   })
 
   it('la vue rotations donne la dernière exécution de chaque tournante', async () => {
-    const reponse = await appel('GET', '/api/rotations/etat?date=2026-09-04')
+    const reponse = await appel('GET', '/api/rotations/etat?date=2026-09-07')
     expect(reponse.statut).toBe(200)
     const parId = new Map(
       reponse.corps.map((l: { task_definition_id: string }) => [l.task_definition_id, l]),
@@ -188,9 +190,9 @@ describe('API — scénario de bout en bout', () => {
       derniere_cible: string
       jours_depuis: number
     }
-    expect(vitres.derniere_execution).toBe('2026-09-01')
+    expect(vitres.derniere_execution).toBe('2026-09-03')
     expect(vitres.derniere_cible).toBe('cuisine')
-    expect(vitres.jours_depuis).toBe(3)
+    expect(vitres.jours_depuis).toBe(4)
     expect((parId.get('refrigerateur') as { jamais_executee: boolean }).jamais_executee).toBe(true)
   })
 
@@ -230,13 +232,13 @@ describe('API — scénario de bout en bout', () => {
 
   it('mode travaux d’un clic puis réactivation', async () => {
     const travaux = await appel('POST', '/api/pieces/mode-travaux', {
-      piece_ids: ['bureau_madame'],
+      piece_ids: ['atelier'],
       debut: '2026-10-01',
       fin: '2026-10-15',
       motif: 'Peinture',
     })
     expect(travaux.statut).toBe(200)
-    const reactivation = await appel('POST', '/api/pieces/bureau_madame/reactiver', {
+    const reactivation = await appel('POST', '/api/pieces/atelier/reactiver', {
       fin: '2026-10-05',
     })
     expect(reactivation.statut).toBe(200)

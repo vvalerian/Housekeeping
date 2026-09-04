@@ -2,14 +2,27 @@
 
 Ce fichier consigne les choix faits là où [SPEC.md](SPEC.md) laisse une latitude, et les extensions minimales au modèle de données. À relire avant de modifier le moteur.
 
-## Questions ouvertes (SPEC §12) — défauts provisoires, signalés dans le code
+## Questions ouvertes (SPEC §12) — TRANCHÉES le 2026-09-04 par les employeurs
 
-Les quatre points que la spec demande de trancher avec les intéressés sont portés par le bloc `A_CONFIRMER` de `packages/core/src/configuration.ts`, avec des valeurs par défaut **provisoires** :
+Les quatre points sont portés par le bloc `CHOIX_FOYER` de `packages/core/src/configuration.ts` (anciennement `A_CONFIRMER`), désormais **validés** :
 
-1. **Cible de rotation des draps** : `ensemble_des_lits` (le défaut suggéré par SPEC §4.4 — tous les lits en une fois, une fois par mois, sur un passage B). L'alternative `rotation_par_chambre` est implémentée et se choisit dans la configuration.
-2. **Pièces incluses dans la rotation des vitres** : toutes les pièces de vie (cuisine, salon, pièce attenante, deux bureaux, trois chambres) ; sanitaires et circulations exclus. Pur choix par défaut, à valider.
-3. **Jours d'intervention** : mardi et vendredi. À valider.
-4. **Langue de l'intervenante** : `fr` seul pour l'instant ; la seconde langue reste à confirmer **avant de figer l'UI** (lot 2). i18next sera introduit avec le premier écran — le lot 1 n'a aucune chaîne d'interface, les libellés du catalogue sont des données éditables, pas des chaînes d'UI.
+1. **Cible de rotation des draps** : `ensemble_des_lits` — les trois chambres en une fois, une fois par mois, sur un passage B (conforme au défaut de SPEC §4.4). L'alternative `rotation_par_chambre` reste implémentée.
+2. **Pièces incluses dans la rotation des vitres** : atelier, bureau, les trois chambres, cuisine, salon, salle à manger (8 pièces) ; sanitaires et circulations exclus.
+3. **Jours d'intervention** : lundi et jeudi (le type A/B découle de l'alternance stricte).
+4. **Langue de l'intervenante** : français uniquement — pas de seconde langue à prévoir. i18next reste introduit au lot 2 pour l'extraction des chaînes (exigence SPEC §6), avec la seule locale `fr`.
+
+## Terminologie des pièces (2026-09-04)
+
+Le vocabulaire réel du foyer diffère de SPEC §3.1, qui est conservé verbatim ; le code utilise les noms réels. Correspondance :
+
+| SPEC §3.1 | Réel (id / nom) | Détail |
+|---|---|---|
+| Salon (24 m²) | `salle_a_manger` / Salle à manger | grande pièce entre la cuisine et le salon, condamnée pendant les travaux, fusionnera avec le salon |
+| Pièce attenante (12 m²) | `salon` / Salon | canapé + étendoir (en attendant les travaux), condamné pendant les travaux |
+| Bureau de Madame (17 m²) | `atelier` / Atelier | contient le poste de télétravail de Madame |
+| Bureau de Monsieur (9 m²) | `bureau` / Bureau | |
+
+Les autres pièces sont inchangées. Toute référence de la SPEC à « salon + pièce attenante » (mode travaux §7, sols zone jour §4.2) se lit donc « salle à manger + salon ».
 
 ## Extensions au modèle de données (par rapport à SPEC §3)
 
@@ -34,5 +47,5 @@ Les quatre points que la spec demande de trancher avec les intéressés sont por
 
 ## Divers
 
-- Le mode « travaux » actuel (salon + pièce attenante condamnés, SPEC §3.1) est appliqué par le seed comme une période d'inactivité ouverte débutant au 2026-08-01 (constante `TRAVAUX_EN_COURS` de la configuration). Réactivation via l'API (`fin` posée) ou, plus tard, l'espace employeur.
+- Le mode « travaux » actuel (salle à manger + salon condamnés, SPEC §3.1) est appliqué par le seed comme une période d'inactivité ouverte débutant au 2026-08-01 (constante `TRAVAUX_EN_COURS` de la configuration). Réactivation via l'API (`fin` posée) ou, plus tard, l'espace employeur.
 - Branche unique `claude/housekeeping-specs-p5sgwt` imposée par la session pour ce lot (la spec §12 suggérait une branche par lot).

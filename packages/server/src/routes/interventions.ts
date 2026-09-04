@@ -6,7 +6,7 @@ import { and, eq, gte, lte } from 'drizzle-orm'
 import { Hono } from 'hono'
 import { z } from 'zod'
 import {
-  A_CONFIRMER,
+  CHOIX_FOYER,
   DateIsoSchema,
   MotifNonFaiteSchema,
   PARAMETRES_PLANIFICATION,
@@ -67,8 +67,8 @@ export function routesInterventions(db: Db): Hono {
     if (corps instanceof Response) return corps
     const existantes = db.select().from(schema.interventions).all()
     const proposees = genererCalendrier(corps.depuis, corps.jusqua, existantes, {
-      jours_intervention: A_CONFIRMER.jours_intervention,
-      premier_type_passage: A_CONFIRMER.premier_type_passage,
+      jours_intervention: CHOIX_FOYER.jours_intervention,
+      premier_type_passage: CHOIX_FOYER.premier_type_passage,
     })
     const creees = proposees.map((p) => ({
       id: randomUUID(),

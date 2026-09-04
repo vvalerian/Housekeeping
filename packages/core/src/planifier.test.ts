@@ -113,8 +113,8 @@ describe('étape 1 — socle du passage', () => {
       'wc_salle_de_bain_complet',
       'sols_zone_jour',
       'depoussierage_zone_jour',
-      'bureau_madame_entretien',
-      'bureau_monsieur_entretien',
+      'atelier_entretien',
+      'bureau_entretien',
     ]) {
       expect(presents).toContain(attendu)
     }
@@ -142,7 +142,7 @@ describe('étape 1 — socle du passage', () => {
     ]) {
       expect(presents).toContain(attendu)
     }
-    for (const absent of ['salle_de_bain_complet', 'bureau_madame_entretien', 'sols_zone_jour']) {
+    for (const absent of ['salle_de_bain_complet', 'atelier_entretien', 'sols_zone_jour']) {
       expect(presents).not.toContain(absent)
     }
   })
@@ -156,33 +156,33 @@ describe('étape 1 — socle du passage', () => {
   })
 
   it('écarte les tâches dont la pièce est inactive à la date', () => {
-    const pieces = avecPieceInactive(PIECES_INITIALES, 'bureau_madame', {
+    const pieces = avecPieceInactive(PIECES_INITIALES, 'atelier', {
       debut: '2026-08-20',
       fin: null,
     })
     const plan = planifier(REF, 'A', historiqueCalme(), configuration({ pieces }))
-    expect(ids(plan)).not.toContain('bureau_madame_entretien')
-    expect(ids(plan)).toContain('bureau_monsieur_entretien')
+    expect(ids(plan)).not.toContain('atelier_entretien')
+    expect(ids(plan)).toContain('bureau_entretien')
   })
 
   it("période d'inactivité : bornes incluses, fin nulle = indéfinie", () => {
-    const pieces = avecPieceInactive(PIECES_INITIALES, 'bureau_madame', {
+    const pieces = avecPieceInactive(PIECES_INITIALES, 'atelier', {
       debut: '2026-09-01',
       fin: '2026-09-30',
     })
     const conf = configuration({ pieces })
-    expect(ids(planifier('2026-08-31', 'A', [], conf))).toContain('bureau_madame_entretien')
-    expect(ids(planifier('2026-09-01', 'A', [], conf))).not.toContain('bureau_madame_entretien')
-    expect(ids(planifier('2026-09-30', 'A', [], conf))).not.toContain('bureau_madame_entretien')
-    expect(ids(planifier('2026-10-01', 'A', [], conf))).toContain('bureau_madame_entretien')
+    expect(ids(planifier('2026-08-31', 'A', [], conf))).toContain('atelier_entretien')
+    expect(ids(planifier('2026-09-01', 'A', [], conf))).not.toContain('atelier_entretien')
+    expect(ids(planifier('2026-09-30', 'A', [], conf))).not.toContain('atelier_entretien')
+    expect(ids(planifier('2026-10-01', 'A', [], conf))).toContain('atelier_entretien')
 
-    const ouverte = avecPieceInactive(PIECES_INITIALES, 'bureau_madame', {
+    const ouverte = avecPieceInactive(PIECES_INITIALES, 'atelier', {
       debut: '2026-09-01',
       fin: null,
     })
     expect(
       ids(planifier('2027-06-01', 'A', [], configuration({ pieces: ouverte }))),
-    ).not.toContain('bureau_madame_entretien')
+    ).not.toContain('atelier_entretien')
   })
 })
 
@@ -272,13 +272,13 @@ describe('étape 2 — tâches tournantes', () => {
   })
 
   it('rotative dont la pièce est inactive : sautée sans casser le compteur, repêchée à la réactivation', () => {
-    // Le canapé (pièce attenante) n'a jamais été aspiré ; toutes les autres
-    // rotatives sont à jour.
+    // Le canapé (salon) n'a jamais été aspiré ; toutes les autres rotatives
+    // sont à jour.
     const historique = historiqueCalme().map((i) => ({
       ...i,
       instances: i.instances.filter((inst) => inst.task_definition_id !== 'aspiration_canape'),
     }))
-    const travaux = avecPieceInactive(PIECES_INITIALES, 'piece_attenante', {
+    const travaux = avecPieceInactive(PIECES_INITIALES, 'salon', {
       debut: '2026-08-01',
       fin: '2026-09-15',
     })
@@ -335,19 +335,23 @@ describe('étape 3 — cibles rotatives', () => {
   })
 
   it('le curseur avance circulairement à partir de la dernière cible traitée', () => {
-    const plan = planifier(REF, 'A', historiqueVitresEnRetard('salon'), configuration())
-    expect(plan.find((p) => p.task_definition_id === 'vitres')!.cible_resolue).toBe(
-      'piece_attenante',
-    )
+    // Liste ordonnée : cuisine, salle à manger, salon, atelier, bureau, chambres.
+    const plan = planifier(REF, 'A', historiqueVitresEnRetard('salle_a_manger'), configuration())
+    expect(plan.find((p) => p.task_definition_id === 'vitres')!.cible_resolue).toBe('salon')
   })
 
   it('le curseur saute une pièce inactive', () => {
-    const pieces = avecPieceInactive(PIECES_INITIALES, 'piece_attenante', {
+    const pieces = avecPieceInactive(PIECES_INITIALES, 'salon', {
       debut: '2026-08-01',
       fin: null,
     })
-    const plan = planifier(REF, 'A', historiqueVitresEnRetard('salon'), configuration({ pieces }))
-    expect(plan.find((p) => p.task_definition_id === 'vitres')!.cible_resolue).toBe('bureau_madame')
+    const plan = planifier(
+      REF,
+      'A',
+      historiqueVitresEnRetard('salle_a_manger'),
+      configuration({ pieces }),
+    )
+    expect(plan.find((p) => p.task_definition_id === 'vitres')!.cible_resolue).toBe('atelier')
   })
 
   it('le curseur boucle en fin de liste', () => {
@@ -356,15 +360,15 @@ describe('étape 3 — cibles rotatives', () => {
   })
 
   it('une cible non traitée (non faite) ne fait pas avancer le curseur', () => {
-    // Vitres faites au salon il y a 40 j ; la tentative suivante (pièce
-    // attenante) n'a pas pu être faite : la prochaine résolution repart du
-    // salon et redonne la pièce attenante.
+    // Vitres faites dans la salle à manger il y a 40 j ; la tentative suivante
+    // (salon) n'a pas pu être faite : la prochaine résolution repart de la
+    // salle à manger et redonne le salon.
     const historique = [
-      ...historiqueVitresEnRetard('salon'),
+      ...historiqueVitresEnRetard('salle_a_manger'),
       intervention(plusJours(REF, -3), 'A', 'cloturee', [
         instance('vitres', 'non_faite', {
-          cible_resolue: 'piece_attenante',
-          room_id_effectif: 'piece_attenante',
+          cible_resolue: 'salon',
+          room_id_effectif: 'salon',
           motif_non_faite: 'manque_de_temps',
           origine: 'rotation',
         }),
@@ -372,7 +376,7 @@ describe('étape 3 — cibles rotatives', () => {
     ]
     const plan = planifier(REF, 'A', historique, configuration())
     const vitres = plan.find((p) => p.task_definition_id === 'vitres')
-    expect(vitres!.cible_resolue).toBe('piece_attenante')
+    expect(vitres!.cible_resolue).toBe('salon')
     expect(vitres!.reportee_depuis).toBe(plusJours(REF, -3))
   })
 
@@ -471,12 +475,12 @@ describe('étape 5 — repêchage', () => {
       ...historiqueCalme(),
       intervention('2026-08-28', 'A', 'cloturee', [
         instance('salle_de_bain_complet', 'non_faite', { motif_non_faite: 'non_necessaire' }),
-        instance('bureau_madame_entretien', 'non_faite', { motif_non_faite: null }),
+        instance('atelier_entretien', 'non_faite', { motif_non_faite: null }),
       ]),
     ]
     const plan = planifier(REF, 'B', historique, configuration())
     expect(ids(plan)).not.toContain('salle_de_bain_complet')
-    expect(ids(plan)).not.toContain('bureau_madame_entretien')
+    expect(ids(plan)).not.toContain('atelier_entretien')
   })
 
   it('une tâche déjà au socle du jour n’est pas dupliquée : elle porte seulement le bandeau', () => {

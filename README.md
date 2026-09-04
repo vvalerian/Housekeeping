@@ -25,7 +25,9 @@ npm run dev           # API sur http://localhost:3000
 | `packages/server` | API HTTP (Hono) + SQLite (better-sqlite3 / Drizzle), seed exécutable. |
 
 Les quatre questions ouvertes de la spec (draps, rotation des vitres, jours
-d'intervention, langue de l'intervenante) ont des défauts **provisoires**,
-regroupés dans le bloc `A_CONFIRMER` de `packages/core/src/configuration.ts`.
+d'intervention, langue de l'intervenante) sont **tranchées** et regroupées dans
+le bloc `CHOIX_FOYER` de `packages/core/src/configuration.ts` : draps sur
+l'ensemble des lits (passage B), vitres sur huit pièces, interventions le lundi
+et le jeudi, français uniquement.
 
 État : **lot 1 livré** (modèle, seed, moteur testé, API). Lots suivants : cf. [SPEC.md](SPEC.md) §11.

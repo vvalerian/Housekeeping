@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { PIECES_INITIALES, TACHES_INITIALES } from './catalogue.js'
-import { A_CONFIRMER, ORDRE_PIECES, TRAVAUX_EN_COURS } from './configuration.js'
+import { CHOIX_FOYER, ORDRE_PIECES, TRAVAUX_EN_COURS } from './configuration.js'
 import { DefinitionTacheSchema, PieceSchema } from './domaine.js'
 
 describe('catalogue initial', () => {
@@ -52,7 +52,7 @@ describe('catalogue initial', () => {
         }
       }
     }
-    for (const id of A_CONFIRMER.pieces_rotation_vitres) {
+    for (const id of CHOIX_FOYER.pieces_rotation_vitres) {
       expect(pieceIds.has(id), `pièce de rotation vitres inconnue : ${id}`).toBe(true)
     }
     for (const id of TRAVAUX_EN_COURS.piece_ids) {
@@ -62,6 +62,6 @@ describe('catalogue initial', () => {
 
   it('le marquage vitres reflète exactement la configuration', () => {
     const marquees = PIECES_INITIALES.filter((p) => p.inclus_rotation_vitres).map((p) => p.id)
-    expect(marquees.sort()).toEqual([...A_CONFIRMER.pieces_rotation_vitres].sort())
+    expect(marquees.sort()).toEqual([...CHOIX_FOYER.pieces_rotation_vitres].sort())
   })
 })

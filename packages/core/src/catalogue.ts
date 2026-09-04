@@ -4,7 +4,7 @@
  * qu'en cas de réinitialisation. Les identifiants sont des slugs stables,
  * référencés par la configuration et les tests.
  */
-import { A_CONFIRMER, ORDRE_PIECES } from './configuration.js'
+import { CHOIX_FOYER, ORDRE_PIECES } from './configuration.js'
 import type { DefinitionTache, Piece } from './domaine.js'
 
 // ---------------------------------------------------------------------------
@@ -18,15 +18,19 @@ interface EbauchePiece {
   surface_m2?: number
 }
 
+// Terminologie du foyer (2026-09-04, cf. DECISIONS.md) : la SPEC §3.1 nommait
+// « Salon » la salle à manger (24 m²), « Pièce attenante » le salon (12 m²,
+// canapé + étendoir), « Bureau de Madame » l'atelier (17 m²) et « Bureau de
+// Monsieur » le bureau (9 m²).
 const EBAUCHES_PIECES: EbauchePiece[] = [
   { id: 'cuisine', nom: 'Cuisine', type: 'cuisine' },
-  { id: 'salon', nom: 'Salon', type: 'salon', surface_m2: 24 },
-  { id: 'piece_attenante', nom: 'Pièce attenante', type: 'salon', surface_m2: 12 },
+  { id: 'salle_a_manger', nom: 'Salle à manger', type: 'salon', surface_m2: 24 },
+  { id: 'salon', nom: 'Salon', type: 'salon', surface_m2: 12 },
   { id: 'couloir', nom: 'Couloir', type: 'circulation' },
   { id: 'entree_1', nom: 'Entrée 1', type: 'circulation' },
   { id: 'entree_2', nom: 'Entrée 2', type: 'circulation' },
-  { id: 'bureau_madame', nom: 'Bureau de Madame', type: 'bureau', surface_m2: 17 },
-  { id: 'bureau_monsieur', nom: 'Bureau de Monsieur', type: 'bureau', surface_m2: 9 },
+  { id: 'atelier', nom: 'Atelier', type: 'bureau', surface_m2: 17 },
+  { id: 'bureau', nom: 'Bureau', type: 'bureau', surface_m2: 9 },
   { id: 'salle_de_bain', nom: 'Salle de bain', type: 'sanitaire' },
   { id: 'wc_salle_de_bain', nom: 'WC salle de bain', type: 'sanitaire' },
   { id: 'salle_de_douche', nom: 'Salle de douche', type: 'sanitaire' },
@@ -49,7 +53,7 @@ export const PIECES_INITIALES: Piece[] = EBAUCHES_PIECES.map((e) => ({
   actif: true,
   periodes_inactivite: [],
   ordre_affichage: (ORDRE_PIECES.indexOf(e.id as (typeof ORDRE_PIECES)[number]) + 1) * 10,
-  inclus_rotation_vitres: A_CONFIRMER.pieces_rotation_vitres.includes(e.id),
+  inclus_rotation_vitres: CHOIX_FOYER.pieces_rotation_vitres.includes(e.id),
 }))
 
 // ---------------------------------------------------------------------------
@@ -70,12 +74,12 @@ interface EbaucheTache {
 }
 
 /**
- * Cible du changement des draps : question ouverte (SPEC §4.4), pilotée par
- * `A_CONFIRMER.cible_rotation_draps`. Par défaut, l'ensemble des lits en une
- * fois (pas de sous-rotation).
+ * Cible du changement des draps (SPEC §4.4), pilotée par
+ * `CHOIX_FOYER.cible_rotation_draps`. Choix validé : l'ensemble des lits en
+ * une fois (pas de sous-rotation).
  */
 const CIBLE_DRAPS: DefinitionTache['cible_rotative'] =
-  A_CONFIRMER.cible_rotation_draps === 'rotation_par_chambre'
+  CHOIX_FOYER.cible_rotation_draps === 'rotation_par_chambre'
     ? { type: 'pieces', piece_ids: ['chambre_enfant_1', 'chambre_enfant_2', 'chambre_parents'] }
     : null
 
@@ -149,7 +153,7 @@ const EBAUCHES_TACHES: EbaucheTache[] = [
     id: 'sols_zone_jour',
     libelle: 'Sols de la zone jour',
     cadence: 'passage_A',
-    checklist: ['Salon', 'Pièce attenante', 'Cuisine', 'Couloir', 'Entrée 1', 'Entrée 2'],
+    checklist: ['Salle à manger', 'Salon', 'Cuisine', 'Couloir', 'Entrée 1', 'Entrée 2'],
     duree_estimee_min: 35,
   },
   {
@@ -160,21 +164,21 @@ const EBAUCHES_TACHES: EbaucheTache[] = [
     duree_estimee_min: 15,
   },
   {
-    id: 'bureau_madame_entretien',
-    libelle: 'Entretien du bureau',
-    room_id: 'bureau_madame',
+    id: 'atelier_entretien',
+    libelle: "Entretien de l'atelier",
+    room_id: 'atelier',
     cadence: 'passage_A',
     checklist: ['Aspiration', 'Lavage du sol', 'Dépoussiérage'],
-    instructions: "Bureau libéré pendant l'intervention.",
+    instructions: "Pièce libérée pendant l'intervention.",
     duree_estimee_min: 15,
   },
   {
-    id: 'bureau_monsieur_entretien',
+    id: 'bureau_entretien',
     libelle: 'Entretien du bureau',
-    room_id: 'bureau_monsieur',
+    room_id: 'bureau',
     cadence: 'passage_A',
     checklist: ['Aspiration', 'Lavage du sol', 'Dépoussiérage'],
-    instructions: "Bureau libéré pendant l'intervention.",
+    instructions: "Pièce libérée pendant l'intervention.",
     duree_estimee_min: 10,
   },
 
@@ -232,7 +236,7 @@ const EBAUCHES_TACHES: EbaucheTache[] = [
     cadence: 'mensuelle',
     checklist: ['Chambre enfant 1', 'Chambre enfant 2', 'Chambre parents'],
     cible_rotative: CIBLE_DRAPS,
-    // Question ouverte (A_CONFIRMER) : par défaut l'ensemble des lits, sur un passage B.
+    // Choix validé (CHOIX_FOYER) : l'ensemble des lits, sur un passage B.
     passage_contraint: 'B',
     instructions: 'Linge de lit disponible dans le placard de chaque chambre, service libre.',
     duree_estimee_min: 30,
@@ -255,7 +259,7 @@ const EBAUCHES_TACHES: EbaucheTache[] = [
   {
     id: 'aspiration_canape',
     libelle: 'Aspiration du canapé',
-    room_id: 'piece_attenante',
+    room_id: 'salon',
     cadence: 'mensuelle',
     checklist: ['Assises', 'Dessous des coussins'],
     duree_estimee_min: 15,
