@@ -7,6 +7,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { creerApp } from './app.js'
 import { ouvrirBase, type Db } from './db/client.js'
+import { reinitialiserMotDePasse } from './db/mot-de-passe.js'
 import { chargerCatalogue } from './db/seed.js'
 
 interface Reponse {
@@ -349,5 +350,21 @@ describe('API — scénario de bout en bout', () => {
     const nouvelle = await anonyme('POST', '/api/auth/pin', {})
     expect(nouvelle.statut).toBe(200)
     expect((await anonyme('GET', '/api/auth/etat')).corps.acteur).toBe('tablette')
+  })
+
+  it('mot de passe réinitialisé côté serveur : sessions fermées, nouveau secret seul accepté', async () => {
+    expect(reinitialiserMotDePasse(db, 'inconnu', 'peu-importe-ici')).toBe(false)
+    expect(reinitialiserMotDePasse(db, 'valerian', 'nouveau-secret')).toBe(true)
+    expect((await employeur('GET', '/api/auth/comptes')).statut).toBe(401)
+    const ancien = await anonyme('POST', '/api/auth/connexion', {
+      identifiant: 'valerian',
+      mot_de_passe: 'tres-long-secret',
+    })
+    expect(ancien.statut).toBe(401)
+    const nouveau = await anonyme('POST', '/api/auth/connexion', {
+      identifiant: 'valerian',
+      mot_de_passe: 'nouveau-secret',
+    })
+    expect(nouveau.statut).toBe(200)
   })
 })

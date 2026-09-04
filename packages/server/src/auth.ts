@@ -11,10 +11,13 @@ import { eq, lt } from 'drizzle-orm'
 import type { Context } from 'hono'
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { createMiddleware } from 'hono/factory'
+import { z } from 'zod'
 import type { Db } from './db/client.js'
 import * as schema from './db/schema.js'
 
 export const COOKIE_SESSION = 'hk_session'
+/** Politique de mot de passe employeur, partagée par l'API et le script de réinitialisation. */
+export const MotDePasseSchema = z.string().min(8).max(256)
 export const CLE_PIN = 'pin_tablette_hash'
 /** Valeur sentinelle du paramètre PIN : accès tablette sans code, choix explicite. */
 export const PIN_DESACTIVE = 'desactive'

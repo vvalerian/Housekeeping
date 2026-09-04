@@ -95,6 +95,22 @@ git pull
 docker compose up -d --build
 ```
 
+## 6. Mot de passe employeur oublié
+
+Aucune route web ne le permet (volontairement) ; on le réinitialise sur le
+serveur, dans le conteneur. L'identifiant est sensible à la casse. Le secret
+passe par l'environnement pour ne pas apparaître dans `ps` ni dans
+l'historique du shell :
+
+```bash
+read -s 'MDP?Nouveau mot de passe : '
+docker exec -e HOUSEKEEPING_MDP="$MDP" housekeeping-app-1 \
+  node_modules/.bin/tsx packages/server/src/db/mot-de-passe.ts <identifiant>
+```
+
+Les sessions ouvertes du compte sont fermées. Après dix échecs de connexion
+en quinze minutes, l'identifiant est bloqué le temps restant de la fenêtre.
+
 ## La tablette dans tout ça
 
 La tablette du domicile peut viser directement `http://IP-locale:3010` (hors

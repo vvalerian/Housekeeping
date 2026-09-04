@@ -19,6 +19,7 @@ import {
   exigerEmployeur,
   hacher,
   lireParametre,
+  MotDePasseSchema,
   noterEchec,
   PIN_DESACTIVE,
   verifierSecret,
@@ -29,7 +30,7 @@ import { lireCorps, maintenant } from '../http.js'
 
 const CreationCompteSchema = z.object({
   identifiant: z.string().min(3).max(64),
-  mot_de_passe: z.string().min(8).max(256),
+  mot_de_passe: MotDePasseSchema,
 })
 
 const ConnexionSchema = z.object({
