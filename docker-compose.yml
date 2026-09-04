@@ -1,6 +1,8 @@
 # Housekeeping en production domestique — cf. deploy/README.md.
 # Le port n'est exposé que sur 127.0.0.1 : c'est nginx qui publie l'application
 # (TLS + authentification transitoire) sur https://housekeeping.vv-architech.fr.
+# HOUSEKEEPING_PORT (fichier .env à côté, non versionné) choisit le port hôte
+# quand 3000 est déjà pris par un autre service de la machine.
 services:
   app:
     build:
@@ -8,7 +10,7 @@ services:
       dockerfile: deploy/Dockerfile
     restart: unless-stopped
     ports:
-      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:${HOUSEKEEPING_PORT:-3000}:3000"
     volumes:
       - ./data:/data
     environment:
