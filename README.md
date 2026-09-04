@@ -31,4 +31,6 @@ le bloc `CHOIX_FOYER` de `packages/core/src/configuration.ts` : draps sur
 l'ensemble des lits (passage B), vitres sur huit pièces, interventions le lundi
 et le jeudi, français uniquement.
 
+**Déploiement** : conteneur Docker derrière nginx (TLS + Basic Auth transitoire) — voir [deploy/README.md](deploy/README.md).
+
 État : **lots 1 et 2 livrés** (modèle, seed, moteur testé, API, interface tablette). Lots suivants : cf. [SPEC.md](SPEC.md) §11.

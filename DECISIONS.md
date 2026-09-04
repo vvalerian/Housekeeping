@@ -56,6 +56,15 @@ Les autres pièces sont inchangées. Toute référence de la SPEC à « salon + 
 - **Servir l'interface** : le serveur sert `packages/tablette/dist` quand il existe (même origine pour l'app et l'API) ; en développement, Vite proxifie `/api` vers `:3000`.
 - Le hors ligne (file d'écritures, PWA) reste au lot 4 : toute la conversation réseau est déjà isolée dans `packages/tablette/src/api.ts` pour s'y insérer sans toucher aux écrans.
 
+## Exposition publique (2026-09-07, demande des employeurs)
+
+L'application est publiée sur `https://housekeeping.vv-architech.fr` derrière le nginx du foyer — c'est une divergence assumée avec SPEC §9, qui recommandait un accès distant via Tailscale sans ouverture de port. Garde-fous (cf. `deploy/`) :
+
+- le conteneur n'écoute que sur `127.0.0.1:3000` (jamais exposé directement) ;
+- TLS Let's Encrypt, redirection 80 → 443 ;
+- **Basic Auth nginx transitoire et obligatoire** tant que l'application n'a pas sa propre authentification — à retirer au déploiement du lot 3 (PIN tablette + comptes employeurs) ;
+- sauvegarde quotidienne à chaud (`db:backup`, rétention 30 j) branchée sur cron, conformément à SPEC §8.
+
 ## Divers
 
 - Le mode « travaux » actuel (salle à manger + salon condamnés, SPEC §3.1) est appliqué par le seed comme une période d'inactivité ouverte débutant au 2026-08-01 (constante `TRAVAUX_EN_COURS` de la configuration). Réactivation via l'API (`fin` posée) ou, plus tard, l'espace employeur.

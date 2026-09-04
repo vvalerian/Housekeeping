@@ -29,6 +29,10 @@ npm run dev:tablette   # Vite en développement (proxy /api vers :3000)
 npm run build          # build de la tablette
 ```
 
+## Déploiement
+
+Production domestique : conteneur Docker (`docker-compose.yml` + `deploy/Dockerfile`, base SQLite dans `./data/`) derrière le nginx du foyer sur `https://housekeeping.vv-architech.fr` — marche à suivre, vhost et sauvegardes dans [deploy/README.md](deploy/README.md). **Basic Auth nginx obligatoire tant que le lot 3 (authentification) n'est pas déployé.**
+
 ## Avancement
 
 - **Lot 1 livré** : modèle de données, seed, moteur `planifier()` + tests, API.
