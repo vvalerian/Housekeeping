@@ -17,6 +17,7 @@ import {
   joursEntre,
   TypeInterventionSchema,
 } from '@housekeeping/core'
+import { exigerEmployeur } from '../auth.js'
 import type { Db } from '../db/client.js'
 import * as schema from '../db/schema.js'
 import { aujourdHui, lireCorps, maintenant } from '../http.js'
@@ -62,7 +63,7 @@ export function routesInterventions(db: Db): Hono {
 
   // --- Calendrier ---------------------------------------------------------
 
-  routes.post('/calendrier/generer', async (c) => {
+  routes.post('/calendrier/generer', exigerEmployeur, async (c) => {
     const corps = await lireCorps(c, GenerationCalendrierSchema)
     if (corps instanceof Response) return corps
     const existantes = db.select().from(schema.interventions).all()
@@ -161,7 +162,7 @@ export function routesInterventions(db: Db): Hono {
     return c.json({ intervention, instances: assurerPlan(db, intervention) })
   })
 
-  routes.post('/interventions', async (c) => {
+  routes.post('/interventions', exigerEmployeur, async (c) => {
     const corps = await lireCorps(c, CreationInterventionSchema)
     if (corps instanceof Response) return corps
     const intervention = {
@@ -226,7 +227,7 @@ export function routesInterventions(db: Db): Hono {
     return c.json({ intervention: rechargee, instances: assurerPlan(db, rechargee) })
   })
 
-  routes.post('/interventions/:id/annuler', (c) => {
+  routes.post('/interventions/:id/annuler', exigerEmployeur, (c) => {
     const intervention = chercherIntervention(c.req.param('id'))
     if (intervention === undefined) return c.json({ erreur: 'Intervention inconnue' }, 404)
     if (intervention.statut === 'cloturee') {
@@ -239,7 +240,7 @@ export function routesInterventions(db: Db): Hono {
     return c.json(chercherIntervention(intervention.id))
   })
 
-  routes.patch('/interventions/:id', async (c) => {
+  routes.patch('/interventions/:id', exigerEmployeur, async (c) => {
     const corps = await lireCorps(c, ModificationInterventionSchema)
     if (corps instanceof Response) return corps
     const intervention = chercherIntervention(c.req.param('id'))

@@ -14,6 +14,7 @@ import {
   PieceSchema,
   TypePieceSchema,
 } from '@housekeeping/core'
+import { exigerEmployeur } from '../auth.js'
 import type { Db } from '../db/client.js'
 import * as schema from '../db/schema.js'
 import { aujourdHui, lireCorps } from '../http.js'
@@ -62,7 +63,7 @@ export function routesConfiguration(db: Db): Hono {
     c.json(db.select().from(schema.pieces).orderBy(schema.pieces.ordre_affichage).all()),
   )
 
-  routes.post('/pieces', async (c) => {
+  routes.post('/pieces', exigerEmployeur, async (c) => {
     const corps = await lireCorps(c, CreationPieceSchema)
     if (corps instanceof Response) return corps
     const ordreMax = db
@@ -87,7 +88,7 @@ export function routesConfiguration(db: Db): Hono {
   // Mode « travaux » d'un clic (SPEC §7) : une période d'inactivité posée sur
   // plusieurs pièces à la fois, avec réactivation automatique si `fin` est
   // fournie (les périodes sont évaluées à la date, rien à faire à l'échéance).
-  routes.post('/pieces/mode-travaux', async (c) => {
+  routes.post('/pieces/mode-travaux', exigerEmployeur, async (c) => {
     const corps = await lireCorps(c, ModeTravauxSchema)
     if (corps instanceof Response) return corps
     const cibles = corps.piece_ids.map((id) =>
@@ -111,7 +112,7 @@ export function routesConfiguration(db: Db): Hono {
     return c.json({ pieces: corps.piece_ids, periode })
   })
 
-  routes.post('/pieces/:id/reactiver', async (c) => {
+  routes.post('/pieces/:id/reactiver', exigerEmployeur, async (c) => {
     const corps = await lireCorps(c, ReactivationSchema)
     if (corps instanceof Response) return corps
     const piece = db
@@ -131,7 +132,7 @@ export function routesConfiguration(db: Db): Hono {
     return c.json({ ...piece, actif: true, periodes_inactivite: periodes })
   })
 
-  routes.patch('/pieces/:id', async (c) => {
+  routes.patch('/pieces/:id', exigerEmployeur, async (c) => {
     const corps = await lireCorps(c, ModificationPieceSchema)
     if (corps instanceof Response) return corps
     const id = c.req.param('id')
@@ -147,7 +148,7 @@ export function routesConfiguration(db: Db): Hono {
 
   routes.get('/taches', (c) => c.json(db.select().from(schema.taches).all()))
 
-  routes.post('/taches', async (c) => {
+  routes.post('/taches', exigerEmployeur, async (c) => {
     const corps = await lireCorps(c, CreationTacheSchema)
     if (corps instanceof Response) return corps
     if (
@@ -172,7 +173,7 @@ export function routesConfiguration(db: Db): Hono {
     return c.json(tache, 201)
   })
 
-  routes.patch('/taches/:id', async (c) => {
+  routes.patch('/taches/:id', exigerEmployeur, async (c) => {
     const corps = await lireCorps(c, ModificationTacheSchema)
     if (corps instanceof Response) return corps
     const id = c.req.param('id')

@@ -12,6 +12,7 @@ import {
   StatutSignalementSchema,
   TypeSignalementSchema,
 } from '@housekeeping/core'
+import { exigerEmployeur } from '../auth.js'
 import type { Db } from '../db/client.js'
 import * as schema from '../db/schema.js'
 import { lireCorps, maintenant } from '../http.js'
@@ -64,7 +65,7 @@ export function routesEchanges(db: Db): Hono {
     return c.json(statut === undefined ? lignes : lignes.filter((d) => d.statut === statut))
   })
 
-  routes.post('/demandes', async (c) => {
+  routes.post('/demandes', exigerEmployeur, async (c) => {
     const corps = await lireCorps(c, CreationDemandeSchema)
     if (corps instanceof Response) return corps
     if (corps.intervention_id != null) {
@@ -89,7 +90,7 @@ export function routesEchanges(db: Db): Hono {
     return c.json(demande, 201)
   })
 
-  routes.patch('/demandes/:id', async (c) => {
+  routes.patch('/demandes/:id', exigerEmployeur, async (c) => {
     const corps = await lireCorps(c, ModificationDemandeSchema)
     if (corps instanceof Response) return corps
     const demande = db
@@ -140,7 +141,7 @@ export function routesEchanges(db: Db): Hono {
     return c.json(signalement, 201)
   })
 
-  routes.patch('/signalements/:id', async (c) => {
+  routes.patch('/signalements/:id', exigerEmployeur, async (c) => {
     const corps = await lireCorps(c, ModificationSignalementSchema)
     if (corps instanceof Response) return corps
     const signalement = db
@@ -166,7 +167,7 @@ export function routesEchanges(db: Db): Hono {
     c.json(db.select().from(schema.produits).orderBy(schema.produits.nom).all()),
   )
 
-  routes.post('/produits', async (c) => {
+  routes.post('/produits', exigerEmployeur, async (c) => {
     const corps = await lireCorps(c, CreationProduitSchema)
     if (corps instanceof Response) return corps
     const produit = {

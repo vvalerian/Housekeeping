@@ -112,3 +112,27 @@ export const messages = sqliteTable('messages', {
   texte: text('texte').notNull(),
   cree_le: text('cree_le').notNull(),
 })
+
+// --- Authentification (lot 3) ----------------------------------------------
+
+export const comptesEmployeurs = sqliteTable('comptes_employeurs', {
+  id: text('id').primaryKey(),
+  identifiant: text('identifiant').notNull().unique(),
+  /** Format `sel:hash` (scrypt), cf. `src/auth.ts`. */
+  mot_de_passe_hash: text('mot_de_passe_hash').notNull(),
+  cree_le: text('cree_le').notNull(),
+})
+
+export const sessionsAuth = sqliteTable('sessions_auth', {
+  jeton: text('jeton').primaryKey(),
+  type: text('type').$type<'employeur' | 'tablette'>().notNull(),
+  compte_id: text('compte_id').references(() => comptesEmployeurs.id, { onDelete: 'cascade' }),
+  cree_le: text('cree_le').notNull(),
+  expire_le: text('expire_le').notNull(), // ISO 8601
+})
+
+/** Petits réglages persistés (ex. `pin_tablette_hash`), clé → valeur. */
+export const parametres = sqliteTable('parametres', {
+  cle: text('cle').primaryKey(),
+  valeur: text('valeur').notNull(),
+})

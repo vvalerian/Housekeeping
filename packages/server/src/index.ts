@@ -11,8 +11,10 @@ if (!baseDejaPeuplee(db)) {
   )
 }
 
-const dossierTablette = fileURLToPath(new URL('../../tablette/dist', import.meta.url))
-const app = creerApp(db, { dossierStatique: dossierTablette })
+const app = creerApp(db, {
+  dossierStatique: fileURLToPath(new URL('../../tablette/dist', import.meta.url)),
+  dossierEmployeur: fileURLToPath(new URL('../../employeur/dist', import.meta.url)),
+})
 
 const port = Number(process.env.PORT ?? 3000)
 serve({ fetch: app.fetch, port }, (info) => {
