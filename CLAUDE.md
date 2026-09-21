@@ -9,7 +9,7 @@ Monorepo npm workspaces :
 - `packages/core` — domaine pur : schémas Zod, catalogue initial (seed), configuration du foyer, **moteur de planification** (`src/planifier.ts`, fonction pure sans I/O — ne jamais y introduire d'accès base, d'horloge ou de réseau) et génération du calendrier. Toute la logique métier testable vit ici.
 - `packages/server` — API HTTP (Hono), persistance SQLite (better-sqlite3 + Drizzle), seed exécutable. Sert aussi le build de la tablette (`packages/tablette/dist`) quand il existe.
 - `packages/tablette` — interface tablette (React + Vite + Tailwind + TanStack Query + i18next). Réseau isolé dans `src/api.ts` (le hors ligne du lot 4 s'y branchera), logique d'affichage pure dans `src/lib.ts` (testée), chaînes toutes extraites dans `src/locales/fr.json`. Verrouillée par le PIN (écran `src/ecrans/Pin.tsx`).
-- `packages/employeur` — espace employeur (React + Vite + Tailwind, français en dur — décision DECISIONS.md), servi sous `/admin` : calendrier, rotations, pièces (mode travaux), tâches, demandes, signalements, messages, produits, sécurité (PIN + comptes). Auth serveur dans `packages/server/src/auth.ts` (scrypt, sessions cookie, gardes `exigerEmployeur`).
+- `packages/employeur` — espace employeur (React + Vite + Tailwind, français en dur — décision DECISIONS.md), servi sous `/admin` : calendrier, rotations, pièces (mode travaux), tâches, demandes, signalements, messages, produits, sécurité (PIN + comptes). Auth serveur dans `packages/server/src/auth.ts` (scrypt, sessions cookie, gardes `exigerEmployeur` / `exigerEcriture` — les comptes ont un rôle `employeur` ou `observateur`, ce dernier en lecture seule stricte côté serveur).
 
 ## Points d'attention
 
@@ -40,4 +40,5 @@ Production domestique : conteneur Docker (`docker-compose.yml` + `deploy/Dockerf
 - **Lot 2 livré** : interface tablette — accueil, plan du jour par cartes de pièce, validation avec motifs, ajout spontané, clôture, bouton « Signaler », écran maintenu allumé, i18next (fr).
 - **Lot 3 livré** : authentification (comptes employeurs, PIN tablette, sessions, cloisonnement des routes) + espace employeur `/admin` complet (SPEC §7). Déployé sur https://housekeeping.vv-architech.fr (Mac du foyer, cf. deploy/README.md).
 - **Bilinguisme fr/pt-BR livré** (2026-09-21) + **PWA installable** (manifest, service worker, icônes — partie du lot 4).
+- **Rôle observateur livré** (2026-09-21) : comptes en lecture seule pour la société de prestation (403 serveur sur toute écriture, UI `/admin` dégradée via `ContexteLectureSeule`, création/suppression dans Sécurité — voir DECISIONS.md).
 - Reste du lot 4 : file d'écritures hors ligne (IndexedDB, à brancher dans `packages/tablette/src/api.ts`), mode kiosque de la tablette.

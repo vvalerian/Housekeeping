@@ -1,0 +1,1 @@
+ALTER TABLE `comptes_employeurs` ADD `role` text DEFAULT 'employeur' NOT NULL;

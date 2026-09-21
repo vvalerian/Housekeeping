@@ -103,6 +103,18 @@ que les champs vides) :
 docker exec housekeeping-app-1 node_modules/.bin/tsx packages/server/src/db/traductions.ts
 ```
 
+## L'accès de la société de prestation (lecture seule)
+
+Depuis la mise à jour du 2026-09-21 (la migration de base s'applique toute
+seule au démarrage du conteneur), l'espace employeur sait créer des comptes
+**lecture seule** : `/admin` → **Sécurité** → « Créer le compte » avec le rôle
+**« Lecture seule (société de prestation) »**. Transmettre l'identifiant à
+l'agence ; elle se connecte sur `https://housekeeping.vv-architech.fr/admin`
+et voit tout (calendrier, comptes rendus, signalements…) sans pouvoir rien
+modifier — le serveur refuse ses écritures, ce n'est pas qu'un masquage.
+Pour couper l'accès : supprimer le compte (même page), la déconnexion est
+immédiate. Le dernier compte employeur, lui, n'est pas supprimable.
+
 ## Le téléphone de l'intervenante
 
 Sur son téléphone (réglé en portugais — l'interface et le catalogue suivent la

@@ -1,4 +1,5 @@
 import { useDeconnexion, useEtatAuth, useSignalements } from './api.js'
+import { ContexteLectureSeule, useLectureSeule } from './lecture.js'
 import { naviguer, useRoute } from './routeur.js'
 import { Connexion } from './pages/Connexion.js'
 import { Calendrier } from './pages/Calendrier.js'
@@ -28,13 +29,20 @@ function Navigation() {
   const route = useRoute()
   const deconnexion = useDeconnexion()
   const signalements = useSignalements()
+  const lectureSeule = useLectureSeule()
   const ouverts = (signalements.data ?? []).filter((s) => s.statut === 'ouvert').length
+  const liens = lectureSeule ? LIENS.filter((l) => l.chemin !== '/securite') : LIENS
 
   return (
     <nav className="flex w-52 shrink-0 flex-col border-r border-slate-200 bg-white">
-      <p className="px-5 pt-5 pb-3 text-lg font-bold text-slate-900">Housekeeping</p>
+      <p className="px-5 pt-5 pb-1 text-lg font-bold text-slate-900">Housekeeping</p>
+      {lectureSeule && (
+        <p className="mx-5 mb-2 w-fit rounded-full bg-slate-200 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+          Lecture seule
+        </p>
+      )}
       <ul className="flex-1">
-        {LIENS.map((lien) => {
+        {liens.map((lien) => {
           const actif = lien.chemin === '/' ? route === '/' : route.startsWith(lien.chemin)
           return (
             <li key={lien.chemin}>
@@ -99,19 +107,21 @@ export default function App() {
   if (etat.data === undefined) {
     return <main className="grid min-h-dvh place-items-center text-slate-500">Chargement…</main>
   }
-  if (etat.data.acteur !== 'employeur') {
+  if (etat.data.acteur !== 'employeur' && etat.data.acteur !== 'observateur') {
     // Une session tablette sur /admin n'a pas les droits : on repasse par la connexion.
     return <Connexion initialisation={etat.data.initialisation_requise} />
   }
   return (
-    <div className="flex min-h-dvh">
-      <Navigation />
-      <main className="min-w-0 flex-1 p-6">
-        <div className="mx-auto flex max-w-4xl flex-col gap-5">
-          <Page />
-        </div>
-      </main>
-    </div>
+    <ContexteLectureSeule.Provider value={etat.data.acteur === 'observateur'}>
+      <div className="flex min-h-dvh">
+        <Navigation />
+        <main className="min-w-0 flex-1 p-6">
+          <div className="mx-auto flex max-w-4xl flex-col gap-5">
+            <Page />
+          </div>
+        </main>
+      </div>
+    </ContexteLectureSeule.Provider>
   )
 }
 

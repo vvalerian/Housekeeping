@@ -124,12 +124,17 @@ export const comptesEmployeurs = sqliteTable('comptes_employeurs', {
   identifiant: text('identifiant').notNull().unique(),
   /** Format `sel:hash` (scrypt), cf. `src/auth.ts`. */
   mot_de_passe_hash: text('mot_de_passe_hash').notNull(),
+  /**
+   * `employeur` : accès complet ; `observateur` : lecture seule (compte donné
+   * à la société de prestation — 2026-09-21).
+   */
+  role: text('role').$type<'employeur' | 'observateur'>().notNull().default('employeur'),
   cree_le: text('cree_le').notNull(),
 })
 
 export const sessionsAuth = sqliteTable('sessions_auth', {
   jeton: text('jeton').primaryKey(),
-  type: text('type').$type<'employeur' | 'tablette'>().notNull(),
+  type: text('type').$type<'employeur' | 'tablette' | 'observateur'>().notNull(),
   compte_id: text('compte_id').references(() => comptesEmployeurs.id, { onDelete: 'cascade' }),
   cree_le: text('cree_le').notNull(),
   expire_le: text('expire_le').notNull(), // ISO 8601

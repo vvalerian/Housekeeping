@@ -17,7 +17,7 @@ import {
   joursEntre,
   TypeInterventionSchema,
 } from '@housekeeping/core'
-import { exigerEmployeur } from '../auth.js'
+import { exigerEcriture, exigerEmployeur } from '../auth.js'
 import type { Db } from '../db/client.js'
 import * as schema from '../db/schema.js'
 import { aujourdHui, lireCorps, maintenant } from '../http.js'
@@ -179,7 +179,7 @@ export function routesInterventions(db: Db): Hono {
     return c.json(intervention, 201)
   })
 
-  routes.post('/interventions/:id/demarrer', (c) => {
+  routes.post('/interventions/:id/demarrer', exigerEcriture, (c) => {
     const intervention = chercherIntervention(c.req.param('id'))
     if (intervention === undefined) return c.json({ erreur: 'Intervention inconnue' }, 404)
     if (intervention.statut === 'cloturee' || intervention.statut === 'annulee') {
@@ -196,7 +196,7 @@ export function routesInterventions(db: Db): Hono {
     return c.json({ intervention: rechargee, instances: assurerPlan(db, rechargee) })
   })
 
-  routes.post('/interventions/:id/cloturer', async (c) => {
+  routes.post('/interventions/:id/cloturer', exigerEcriture, async (c) => {
     const corps = await lireCorps(c, ClotureSchema)
     if (corps instanceof Response) return corps
     const intervention = chercherIntervention(c.req.param('id'))
@@ -257,7 +257,7 @@ export function routesInterventions(db: Db): Hono {
 
   // --- Instances ----------------------------------------------------------
 
-  routes.patch('/instances/:id', async (c) => {
+  routes.patch('/instances/:id', exigerEcriture, async (c) => {
     const corps = await lireCorps(c, ValidationInstanceSchema)
     if (corps instanceof Response) return corps
     const instance = db
@@ -285,7 +285,7 @@ export function routesInterventions(db: Db): Hono {
     )
   })
 
-  routes.post('/interventions/:id/instances', async (c) => {
+  routes.post('/interventions/:id/instances', exigerEcriture, async (c) => {
     const corps = await lireCorps(c, AjoutSpontaneSchema)
     if (corps instanceof Response) return corps
     const intervention = chercherIntervention(c.req.param('id'))

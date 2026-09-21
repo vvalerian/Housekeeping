@@ -1,6 +1,8 @@
 /**
  * Authentification (lot 3, SPEC §2 et §9) :
  * - employeurs : identifiant + mot de passe (scrypt), session de 30 jours ;
+ * - observateurs : identifiant + mot de passe, lecture seule (compte donné à
+ *   la société de prestation) ;
  * - tablette : code PIN à 4 chiffres, désactivable en configuration, session
  *   longue (365 jours) portée par un cookie lié à l'appareil.
  * Les sessions vivent en base (`sessions_auth`), le cookie HttpOnly `hk_session`
@@ -22,9 +24,12 @@ export const CLE_PIN = 'pin_tablette_hash'
 /** Valeur sentinelle du paramètre PIN : accès tablette sans code, choix explicite. */
 export const PIN_DESACTIVE = 'desactive'
 
-const DUREE_SESSION_JOURS = { employeur: 30, tablette: 365 } as const
+const DUREE_SESSION_JOURS = { employeur: 30, observateur: 30, tablette: 365 } as const
 
-export type Acteur = { type: 'employeur'; compte_id: string } | { type: 'tablette' }
+export type Acteur =
+  | { type: 'employeur'; compte_id: string }
+  | { type: 'observateur'; compte_id: string }
+  | { type: 'tablette' }
 
 declare module 'hono' {
   interface ContextVariableMap {
@@ -109,7 +114,7 @@ export function ecrireParametre(db: Db, cle: string, valeur: string | null): voi
 export function creerSession(
   db: Db,
   c: Context,
-  type: 'employeur' | 'tablette',
+  type: 'employeur' | 'observateur' | 'tablette',
   compteId: string | null,
 ): void {
   const jeton = randomBytes(32).toString('hex')
@@ -148,9 +153,8 @@ export function acteurDeLaRequete(db: Db, c: Context): Acteur | null {
     .where(eq(schema.sessionsAuth.jeton, jeton))
     .get()
   if (session === undefined || session.expire_le <= new Date().toISOString()) return null
-  return session.type === 'employeur'
-    ? { type: 'employeur', compte_id: session.compte_id! }
-    : { type: 'tablette' }
+  if (session.type === 'tablette') return { type: 'tablette' }
+  return { type: session.type, compte_id: session.compte_id! }
 }
 
 export function detruireSession(db: Db, c: Context): void {
@@ -179,6 +183,18 @@ export function authentification(db: Db) {
 export const exigerEmployeur = createMiddleware(async (c, next) => {
   if (c.get('acteur')?.type !== 'employeur') {
     return c.json({ erreur: 'Réservé aux employeurs' }, 403)
+  }
+  return next()
+})
+
+/**
+ * À poser sur les écritures « de terrain » (validation d'instances, clôture,
+ * signalements, niveaux de produits, messages) : ouvertes à la tablette et
+ * aux employeurs, refusées aux comptes observateurs (lecture seule).
+ */
+export const exigerEcriture = createMiddleware(async (c, next) => {
+  if (c.get('acteur')?.type === 'observateur') {
+    return c.json({ erreur: 'Compte en lecture seule' }, 403)
   }
   return next()
 })

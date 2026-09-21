@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useCreerProduit, useModifierProduit, useProduits } from '../api.js'
 import { Bouton, Carte, Champ } from '../composants/ui.js'
+import { useLectureSeule } from '../lecture.js'
 import type { ProduitDto } from '../types.js'
 
 const NIVEAUX: { valeur: ProduitDto['niveau']; libelle: string; style: string }[] = [
@@ -11,6 +12,7 @@ const NIVEAUX: { valeur: ProduitDto['niveau']; libelle: string; style: string }[
 
 /** Suivi des consommables (SPEC §3.5 et §7). */
 export function Produits() {
+  const lectureSeule = useLectureSeule()
   const produits = useProduits()
   const creer = useCreerProduit()
   const modifier = useModifierProduit()
@@ -32,6 +34,7 @@ export function Produits() {
                   <button
                     key={niveau.valeur}
                     type="button"
+                    disabled={lectureSeule}
                     onClick={() => modifier.mutate({ id: produit.id, niveau: niveau.valeur })}
                     className={`h-8 rounded-lg border px-3 text-xs font-semibold ${
                       produit.niveau === niveau.valeur
@@ -52,6 +55,7 @@ export function Produits() {
             </p>
           )}
         </ul>
+        {!lectureSeule && (
         <form
           className="mt-4 flex items-end gap-2"
           onSubmit={(evenement) => {
@@ -64,6 +68,7 @@ export function Produits() {
             Ajouter
           </Bouton>
         </form>
+        )}
       </Carte>
     </>
   )

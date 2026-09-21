@@ -85,10 +85,12 @@ export const useConfigurerPin = () =>
   useAction<string | null>((pin) => ({ chemin: '/auth/pin-tablette', corps: { pin } }), ['auth'])
 export const useComptes = () => useListe<CompteDto[]>('comptes', '/auth/comptes')
 export const useCreerCompte = () =>
-  useAction<{ identifiant: string; mot_de_passe: string }>(
+  useAction<{ identifiant: string; mot_de_passe: string; role: 'employeur' | 'observateur' }>(
     (corps) => ({ chemin: '/auth/comptes', corps }),
     ['comptes'],
   )
+export const useSupprimerCompte = () =>
+  useAction<string>((id) => ({ chemin: `/auth/comptes/${id}`, methode: 'DELETE' }), ['comptes'])
 
 // --- Configuration ----------------------------------------------------------
 

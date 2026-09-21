@@ -25,6 +25,8 @@ let employeur: Client
 let tablette: Client
 /** Client sans session. */
 let anonyme: Client
+/** Client du compte lecture seule (société de prestation). */
+let observateur: Client
 
 beforeAll(() => {
   db = ouvrirBase(':memory:')
@@ -51,6 +53,7 @@ beforeAll(() => {
   employeur = creerClient()
   tablette = creerClient()
   anonyme = creerClient()
+  observateur = creerClient()
 })
 
 // Jours d'intervention du foyer : lundi et jeudi. Dans la fenêtre testée,
@@ -341,6 +344,53 @@ describe('API — scénario de bout en bout', () => {
       debut: 'pas-une-date',
     })
     expect(corpsInvalide.statut).toBe(400)
+  })
+
+  it('compte observateur : tout en lecture, aucune écriture, révocable', async () => {
+    // L'employeur crée le compte de la société de prestation.
+    const creation = await employeur('POST', '/api/auth/comptes', {
+      identifiant: 'agence',
+      mot_de_passe: 'lecture-seule-1',
+      role: 'observateur',
+    })
+    expect(creation.statut).toBe(201)
+    expect(creation.corps.role).toBe('observateur')
+
+    const connexion = await observateur('POST', '/api/auth/connexion', {
+      identifiant: 'agence',
+      mot_de_passe: 'lecture-seule-1',
+    })
+    expect(connexion.corps.role).toBe('observateur')
+    expect((await observateur('GET', '/api/auth/etat')).corps.acteur).toBe('observateur')
+
+    // Lecture : tout est ouvert.
+    expect((await observateur('GET', '/api/pieces')).statut).toBe(200)
+    expect((await observateur('GET', '/api/interventions')).statut).toBe(200)
+    expect((await observateur('GET', '/api/rotations/etat')).statut).toBe(200)
+    expect((await observateur('GET', '/api/signalements')).statut).toBe(200)
+
+    // Écritures d'administration ET de terrain : refusées.
+    expect(
+      (await observateur('POST', '/api/pieces', { nom: 'Grenier', type: 'circulation' })).statut,
+    ).toBe(403)
+    expect(
+      (await observateur('POST', '/api/messages', { auteur: 'employeur', texte: 'coucou' })).statut,
+    ).toBe(403)
+    expect(
+      (await observateur('POST', '/api/signalements', { type: 'autre', texte: 'x' })).statut,
+    ).toBe(403)
+    // La gestion des comptes lui est fermée.
+    expect((await observateur('GET', '/api/auth/comptes')).statut).toBe(403)
+
+    // Révocation par l'employeur : le compte disparaît, sa session tombe.
+    const suppression = await employeur('DELETE', `/api/auth/comptes/${creation.corps.id}`)
+    expect(suppression.statut).toBe(200)
+    expect((await observateur('GET', '/api/pieces')).statut).toBe(401)
+
+    // Garde-fou : le dernier compte employeur est insupprimable.
+    const comptes = await employeur('GET', '/api/auth/comptes')
+    const moi = comptes.corps.find((x: { identifiant: string }) => x.identifiant === 'valerian')
+    expect((await employeur('DELETE', `/api/auth/comptes/${moi.id}`)).statut).toBe(409)
   })
 
   it('désactivation explicite du PIN : la tablette entre sans code', async () => {

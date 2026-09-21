@@ -17,6 +17,7 @@ import {
   Modale,
   Selecteur,
 } from '../composants/ui.js'
+import { useLectureSeule } from '../lecture.js'
 import type { InterventionDto } from '../types.js'
 
 const aujourdHui = () => new Date().toLocaleDateString('en-CA')
@@ -28,7 +29,7 @@ function Ligne({ intervention }: { intervention: InterventionDto }) {
   const deplacer = useModifierIntervention()
   const [deplacement, setDeplacement] = useState<string | null>(null)
   const statut = LIBELLES_STATUT[intervention.statut]!
-  const modifiable = intervention.statut === 'planifiee'
+  const modifiable = intervention.statut === 'planifiee' && !useLectureSeule()
 
   return (
     <li className="flex flex-wrap items-center gap-3 border-t border-slate-100 py-2.5 first:border-t-0">
@@ -83,6 +84,7 @@ function Ligne({ intervention }: { intervention: InterventionDto }) {
 }
 
 export function Calendrier() {
+  const lectureSeule = useLectureSeule()
   const interventions = useInterventions()
   const generer = useGenererCalendrier()
   const creer = useCreerIntervention()
@@ -97,12 +99,14 @@ export function Calendrier() {
     <>
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-slate-900">Calendrier</h1>
-        <Bouton
-          onClick={() => generer.mutate({ depuis: aujourdHui(), jusqua: plusJours(56) })}
-          disabled={generer.isPending}
-        >
-          Générer les 8 prochaines semaines
-        </Bouton>
+        {!lectureSeule && (
+          <Bouton
+            onClick={() => generer.mutate({ depuis: aujourdHui(), jusqua: plusJours(56) })}
+            disabled={generer.isPending}
+          >
+            Générer les 8 prochaines semaines
+          </Bouton>
+        )}
       </div>
 
       <Carte titre="À venir">
@@ -119,6 +123,7 @@ export function Calendrier() {
         )}
       </Carte>
 
+      {!lectureSeule && (
       <Carte titre="Ajouter une intervention">
         <form
           className="flex flex-wrap items-end gap-3"
@@ -143,6 +148,7 @@ export function Calendrier() {
           </Bouton>
         </form>
       </Carte>
+      )}
 
       <Carte titre="Historique récent">
         {passees.length === 0 ? (

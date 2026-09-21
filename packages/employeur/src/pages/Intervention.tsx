@@ -10,6 +10,7 @@ import {
   LIBELLES_TYPE,
   ZoneTexte,
 } from '../composants/ui.js'
+import { useLectureSeule } from '../lecture.js'
 import type { InstanceDto } from '../types.js'
 
 function BadgeInstance({ instance }: { instance: InstanceDto }) {
@@ -30,6 +31,7 @@ export function Intervention({ id }: { id: string }) {
   const detail = useIntervention(id)
   const pieces = usePieces()
   const modifier = useModifierIntervention()
+  const lectureSeule = useLectureSeule()
   const [note, setNote] = useState<string | null>(null)
 
   if (detail.data === undefined) {
@@ -67,6 +69,13 @@ export function Intervention({ id }: { id: string }) {
         </Carte>
       )}
 
+      {lectureSeule ? (
+        intervention.note_employeur !== null && (
+          <Carte titre="Consigne du jour">
+            <p className="text-slate-700">{intervention.note_employeur}</p>
+          </Carte>
+        )
+      ) : (
       <Carte titre="Consigne pour ce jour (visible sur la tablette)">
         <ZoneTexte
           label=""
@@ -87,6 +96,7 @@ export function Intervention({ id }: { id: string }) {
           Enregistrer
         </Bouton>
       </Carte>
+      )}
 
       <Carte titre={`Plan (${instances.length} tâches)`}>
         <table className="w-full text-sm">

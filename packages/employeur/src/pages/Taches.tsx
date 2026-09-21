@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useCreerTache, useModifierTache, usePieces, useTaches } from '../api.js'
 import { Badge, Bouton, Carte, Champ, Modale, Selecteur, ZoneTexte } from '../composants/ui.js'
+import { useLectureSeule } from '../lecture.js'
 import type { TacheDto } from '../types.js'
 
 const CADENCES: { valeur: TacheDto['cadence']; libelle: string }[] = [
@@ -118,6 +119,7 @@ function ModaleEdition({ tache, onFermer }: { tache: TacheDto | null; onFermer: 
 }
 
 export function Taches() {
+  const lectureSeule = useLectureSeule()
   const taches = useTaches()
   const pieces = usePieces()
   const modifier = useModifierTache()
@@ -130,7 +132,7 @@ export function Taches() {
     <>
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-slate-900">Tâches</h1>
-        <Bouton onClick={() => setEdition('nouvelle')}>Nouvelle tâche</Bouton>
+        {!lectureSeule && <Bouton onClick={() => setEdition('nouvelle')}>Nouvelle tâche</Bouton>}
       </div>
 
       {CADENCES.map((cadence) => {
@@ -157,15 +159,18 @@ export function Taches() {
                       <input
                         type="checkbox"
                         checked={tache.actif}
+                        disabled={lectureSeule}
                         onChange={(e) =>
                           modifier.mutate({ id: tache.id, corps: { actif: e.target.checked } })
                         }
                       />
                       active
                     </label>
-                    <Bouton variante="secondaire" onClick={() => setEdition(tache)}>
-                      Modifier
-                    </Bouton>
+                    {!lectureSeule && (
+                      <Bouton variante="secondaire" onClick={() => setEdition(tache)}>
+                        Modifier
+                      </Bouton>
+                    )}
                   </span>
                 </li>
               ))}

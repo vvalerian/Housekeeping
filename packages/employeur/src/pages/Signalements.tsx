@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useModifierSignalement, useSignalements } from '../api.js'
 import { Badge, Bouton, Carte, dateCourte, ZoneTexte } from '../composants/ui.js'
+import { useLectureSeule } from '../lecture.js'
 import type { SignalementDto } from '../types.js'
 
 const LIBELLES: Record<string, string> = {
@@ -12,6 +13,7 @@ const LIBELLES: Record<string, string> = {
 
 function Ouvert({ signalement }: { signalement: SignalementDto }) {
   const modifier = useModifierSignalement()
+  const lectureSeule = useLectureSeule()
   const [reponse, setReponse] = useState('')
   return (
     <li className="border-t border-slate-100 py-3 first:border-t-0">
@@ -20,6 +22,7 @@ function Ouvert({ signalement }: { signalement: SignalementDto }) {
         <span className="text-xs text-slate-400">{dateCourte(signalement.cree_le.slice(0, 10))}</span>
       </div>
       <p className="mt-1.5 text-slate-800">{signalement.texte}</p>
+      {!lectureSeule && (
       <div className="mt-2 flex items-end gap-2">
         <div className="flex-1">
           <ZoneTexte
@@ -41,6 +44,7 @@ function Ouvert({ signalement }: { signalement: SignalementDto }) {
           Clore
         </Bouton>
       </div>
+      )}
     </li>
   )
 }

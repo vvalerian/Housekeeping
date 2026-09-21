@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useCreerDemande, useInterventions, useModifierDemande, useDemandes } from '../api.js'
 import { Badge, Bouton, Carte, dateCourte, dateLongue, Selecteur, ZoneTexte } from '../composants/ui.js'
+import { useLectureSeule } from '../lecture.js'
 
 const aujourdHui = () => new Date().toLocaleDateString('en-CA')
 
 /** Demandes ponctuelles : injectées automatiquement dans le plan visé (SPEC §5 étape 4). */
 export function Demandes() {
+  const lectureSeule = useLectureSeule()
   const demandes = useDemandes()
   const interventions = useInterventions()
   const creer = useCreerDemande()
@@ -22,6 +24,7 @@ export function Demandes() {
     <>
       <h1 className="text-xl font-bold text-slate-900">Demandes ponctuelles</h1>
 
+      {!lectureSeule && (
       <Carte titre="Nouvelle demande">
         <form
           className="flex flex-col gap-3"
@@ -56,6 +59,7 @@ export function Demandes() {
           </div>
         </form>
       </Carte>
+      )}
 
       <Carte titre="En attente">
         {parStatut('en_attente').length === 0 ? (
@@ -70,12 +74,14 @@ export function Demandes() {
                 <span className="text-slate-800">{demande.texte}</span>
                 <span className="ml-auto flex items-center gap-2">
                   <span className="text-xs text-slate-400">{dateCourte(demande.cree_le.slice(0, 10))}</span>
-                  <Bouton
-                    variante="danger"
-                    onClick={() => modifier.mutate({ id: demande.id, corps: { statut: 'annulee' } })}
-                  >
-                    Annuler
-                  </Bouton>
+                  {!lectureSeule && (
+                    <Bouton
+                      variante="danger"
+                      onClick={() => modifier.mutate({ id: demande.id, corps: { statut: 'annulee' } })}
+                    >
+                      Annuler
+                    </Bouton>
+                  )}
                 </span>
               </li>
             ))}

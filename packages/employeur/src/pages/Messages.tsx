@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useEnvoyerMessage, useMessages } from '../api.js'
 import { Bouton, Carte } from '../composants/ui.js'
+import { useLectureSeule } from '../lecture.js'
 
 /** Fil de discussion simple et horodaté (SPEC §3.5). */
 export function Messages() {
+  const lectureSeule = useLectureSeule()
   const messages = useMessages()
   const envoyer = useEnvoyerMessage()
   const [texte, setTexte] = useState('')
@@ -37,6 +39,7 @@ export function Messages() {
             <p className="text-sm text-slate-500">Aucun message pour l'instant.</p>
           )}
         </ul>
+        {!lectureSeule && (
         <form
           className="mt-4 flex gap-2"
           onSubmit={(evenement) => {
@@ -54,6 +57,7 @@ export function Messages() {
             Envoyer
           </Bouton>
         </form>
+        )}
       </Carte>
     </>
   )

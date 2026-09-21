@@ -79,6 +79,15 @@ La question 4 de SPEC §12 est définitivement tranchée : l'intervenante est br
 
 L'intervenante utilise son propre téléphone (réglé en portugais) en plus de la tablette du foyer : l'application est **installable** (manifest + service worker vite-plugin-pwa, icônes maskable, coquille précachée pour le démarrage rapide — SPEC §8). Installation : ouvrir l'URL dans Chrome → « Adicionar à tela inicial ». La session PIN d'un an vaut par appareil. Le reste du lot 4 (file d'écritures hors ligne IndexedDB, mode kiosque de la tablette) reste à faire ; `/api` est volontairement servi réseau-direct d'ici là.
 
+## Rôle « observateur » — accès lecture seule (2026-09-21, demande des employeurs)
+
+La société de prestation de services souhaite consulter l'activité sans pouvoir rien modifier. Hors SPEC (qui ne connaît que deux acteurs, §2), ajouté sans en dévier autrement :
+
+- **Modèle** : colonne `role` (`employeur` | `observateur`) sur les comptes ; un observateur se connecte sur `/admin` comme un employeur (mêmes écrans, session 30 jours).
+- **La sécurité est côté serveur** : toutes les routes de configuration exigent toujours un employeur (403 pour un observateur) ; les écritures « de terrain » ouvertes à la tablette (démarrer/clôturer, statuts d'instances, ajout spontané, signalements, niveaux de produits, messages) portent une garde `exigerEcriture` qui refuse l'observateur. Il ne peut donc **que** lire — l'interface masque en plus les formulaires et boutons (badge « Lecture seule », page Sécurité fermée), mais ce n'est que du confort.
+- **Ce qu'il voit** : calendrier, détail des interventions et comptes rendus, rotations, pièces, tâches, demandes, signalements, messages, produits. Ce qu'il ne voit pas : la page Sécurité (comptes, PIN de la tablette — `GET /auth/comptes` lui est aussi refusé).
+- **Révocation** : suppression du compte dans Sécurité — ses sessions tombent immédiatement (cascade). Garde serveur : impossible de supprimer le dernier compte employeur (409), pour ne jamais se verrouiller dehors.
+
 ## Exposition publique (2026-09-07, demande des employeurs)
 
 L'application est publiée sur `https://housekeeping.vv-architech.fr` derrière le nginx du foyer — c'est une divergence assumée avec SPEC §9, qui recommandait un accès distant via Tailscale sans ouverture de port. Garde-fous (cf. `deploy/`) :

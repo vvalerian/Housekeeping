@@ -12,7 +12,7 @@ import {
   StatutSignalementSchema,
   TypeSignalementSchema,
 } from '@housekeeping/core'
-import { exigerEmployeur } from '../auth.js'
+import { exigerEcriture, exigerEmployeur } from '../auth.js'
 import type { Db } from '../db/client.js'
 import * as schema from '../db/schema.js'
 import { lireCorps, maintenant } from '../http.js'
@@ -125,7 +125,7 @@ export function routesEchanges(db: Db): Hono {
     return c.json(statut === undefined ? lignes : lignes.filter((s) => s.statut === statut))
   })
 
-  routes.post('/signalements', async (c) => {
+  routes.post('/signalements', exigerEcriture, async (c) => {
     const corps = await lireCorps(c, CreationSignalementSchema)
     if (corps instanceof Response) return corps
     const signalement = {
@@ -180,7 +180,7 @@ export function routesEchanges(db: Db): Hono {
     return c.json(produit, 201)
   })
 
-  routes.patch('/produits/:id', async (c) => {
+  routes.patch('/produits/:id', exigerEcriture, async (c) => {
     const corps = await lireCorps(c, ModificationProduitSchema)
     if (corps instanceof Response) return corps
     const produit = db
@@ -204,7 +204,7 @@ export function routesEchanges(db: Db): Hono {
     c.json(db.select().from(schema.messages).orderBy(schema.messages.cree_le).all()),
   )
 
-  routes.post('/messages', async (c) => {
+  routes.post('/messages', exigerEcriture, async (c) => {
     const corps = await lireCorps(c, CreationMessageSchema)
     if (corps instanceof Response) return corps
     const message = {

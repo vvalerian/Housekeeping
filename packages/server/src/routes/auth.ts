@@ -31,6 +31,8 @@ import { lireCorps, maintenant } from '../http.js'
 const CreationCompteSchema = z.object({
   identifiant: z.string().min(3).max(64),
   mot_de_passe: MotDePasseSchema,
+  /** `observateur` : lecture seule (société de prestation). */
+  role: z.enum(['employeur', 'observateur']).optional(),
 })
 
 const ConnexionSchema = z.object({
@@ -80,6 +82,7 @@ export function routesAuth(db: Db): Hono {
       id: randomUUID(),
       identifiant: corps.identifiant,
       mot_de_passe_hash: hacher(corps.mot_de_passe),
+      role: 'employeur' as const,
       cree_le: maintenant(),
     }
     db.insert(schema.comptesEmployeurs).values(compte).run()
@@ -104,8 +107,8 @@ export function routesAuth(db: Db): Hono {
       return c.json({ erreur: 'Identifiant ou mot de passe incorrect' }, 401)
     }
     effacerEchecs(cleVerrou)
-    creerSession(db, c, 'employeur', compte.id)
-    return c.json({ identifiant: compte.identifiant })
+    creerSession(db, c, compte.role, compte.id)
+    return c.json({ identifiant: compte.identifiant, role: compte.role })
   })
 
   routes.post('/deconnexion', (c) => {
@@ -154,7 +157,7 @@ export function routesAuth(db: Db): Hono {
         .select()
         .from(schema.comptesEmployeurs)
         .all()
-        .map(({ id, identifiant, cree_le }) => ({ id, identifiant, cree_le })),
+        .map(({ id, identifiant, role, cree_le }) => ({ id, identifiant, role, cree_le })),
     ),
   )
 
@@ -171,10 +174,34 @@ export function routesAuth(db: Db): Hono {
       id: randomUUID(),
       identifiant: corps.identifiant,
       mot_de_passe_hash: hacher(corps.mot_de_passe),
+      role: corps.role ?? ('employeur' as const),
       cree_le: maintenant(),
     }
     db.insert(schema.comptesEmployeurs).values(compte).run()
-    return c.json({ id: compte.id, identifiant: compte.identifiant }, 201)
+    return c.json({ id: compte.id, identifiant: compte.identifiant, role: compte.role }, 201)
+  })
+
+  // Révocation d'un accès (ses sessions tombent par cascade). Garde-fou :
+  // le dernier compte employeur est insupprimable.
+  routes.delete('/comptes/:id', ...reserveEmployeur, (c) => {
+    const compte = db
+      .select()
+      .from(schema.comptesEmployeurs)
+      .where(eq(schema.comptesEmployeurs.id, c.req.param('id')))
+      .get()
+    if (compte === undefined) return c.json({ erreur: 'Compte inconnu' }, 404)
+    if (compte.role === 'employeur') {
+      const employeurs = db
+        .select()
+        .from(schema.comptesEmployeurs)
+        .all()
+        .filter((x) => x.role === 'employeur').length
+      if (employeurs <= 1) {
+        return c.json({ erreur: 'Impossible de supprimer le dernier compte employeur' }, 409)
+      }
+    }
+    db.delete(schema.comptesEmployeurs).where(eq(schema.comptesEmployeurs.id, compte.id)).run()
+    return c.json({ ok: true })
   })
 
   return routes

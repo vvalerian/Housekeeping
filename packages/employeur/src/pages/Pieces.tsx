@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useCreerPiece, useModeTravaux, useModifierPiece, usePieces, useReactiverPiece } from '../api.js'
 import { Badge, Bouton, Carte, Champ, dateCourte, Modale, Selecteur } from '../composants/ui.js'
+import { useLectureSeule } from '../lecture.js'
 import type { PieceDto } from '../types.js'
 
 const aujourdHui = () => new Date().toLocaleDateString('en-CA')
@@ -94,6 +95,7 @@ function ModaleEdition({ piece, onFermer }: { piece: PieceDto | null; onFermer: 
 }
 
 export function Pieces() {
+  const lectureSeule = useLectureSeule()
   const pieces = usePieces()
   const modifier = useModifierPiece()
   const reactiver = useReactiverPiece()
@@ -117,7 +119,7 @@ export function Pieces() {
     <>
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-slate-900">Pièces</h1>
-        <Bouton onClick={() => setEdition('nouvelle')}>Nouvelle pièce</Bouton>
+        {!lectureSeule && <Bouton onClick={() => setEdition('nouvelle')}>Nouvelle pièce</Bouton>}
       </div>
 
       <Carte>
@@ -142,6 +144,7 @@ export function Pieces() {
                       type="checkbox"
                       aria-label={`Sélectionner ${piece.nom} pour le mode travaux`}
                       checked={selection.has(piece.id)}
+                      disabled={lectureSeule}
                       onChange={() => basculerSelection(piece.id)}
                     />
                   </td>
@@ -154,6 +157,7 @@ export function Pieces() {
                       type="checkbox"
                       aria-label={`${piece.nom} dans la rotation des vitres`}
                       checked={piece.inclus_rotation_vitres}
+                      disabled={lectureSeule}
                       onChange={(e) =>
                         modifier.mutate({
                           id: piece.id,
@@ -169,18 +173,22 @@ export function Pieces() {
                           {etat.motif ?? 'Inactive'}
                           {etat.jusqua !== null ? ` → ${dateCourte(etat.jusqua)}` : ''}
                         </Badge>
-                        <Bouton variante="secondaire" onClick={() => reactiver.mutate({ id: piece.id })}>
-                          Réactiver
-                        </Bouton>
+                        {!lectureSeule && (
+                          <Bouton variante="secondaire" onClick={() => reactiver.mutate({ id: piece.id })}>
+                            Réactiver
+                          </Bouton>
+                        )}
                       </span>
                     ) : (
                       <Badge couleur="vert">Active</Badge>
                     )}
                   </td>
                   <td className="py-2 text-right">
-                    <Bouton variante="secondaire" onClick={() => setEdition(piece)}>
-                      Modifier
-                    </Bouton>
+                    {!lectureSeule && (
+                      <Bouton variante="secondaire" onClick={() => setEdition(piece)}>
+                        Modifier
+                      </Bouton>
+                    )}
                   </td>
                 </tr>
               )
@@ -189,6 +197,7 @@ export function Pieces() {
         </table>
       </Carte>
 
+      {!lectureSeule && (
       <Carte titre="Mode travaux d'un clic">
         <p className="mb-3 text-sm text-slate-500">
           Cocher les pièces concernées ci-dessus, choisir la période : elles disparaissent du
@@ -221,6 +230,7 @@ export function Pieces() {
           </Bouton>
         </div>
       </Carte>
+      )}
 
       {edition !== null && (
         <ModaleEdition piece={edition === 'nouvelle' ? null : edition} onFermer={() => setEdition(null)} />

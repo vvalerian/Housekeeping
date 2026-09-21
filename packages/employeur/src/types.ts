@@ -17,7 +17,7 @@ import type {
 
 export interface EtatAuthDto {
   initialisation_requise: boolean
-  acteur: 'employeur' | 'tablette' | null
+  acteur: 'employeur' | 'tablette' | 'observateur' | null
   pin: 'non_configure' | 'requis' | 'desactive'
 }
 
@@ -125,5 +125,6 @@ export interface MessageDto {
 export interface CompteDto {
   id: string
   identifiant: string
+  role: 'employeur' | 'observateur'
   cree_le: string
 }
