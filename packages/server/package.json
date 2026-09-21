@@ -11,7 +11,8 @@
     "db:mot-de-passe": "tsx src/db/mot-de-passe.ts",
     "db:generate": "drizzle-kit generate",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:traduire": "tsx src/db/traductions.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.1",

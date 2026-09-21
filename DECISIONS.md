@@ -66,6 +66,19 @@ Les autres pièces sont inchangées. Toute référence de la SPEC à « salon + 
 - La `cible_rotative` d'une tâche s'affiche dans l'UI mais ne s'y édite pas (structure fine, cas rare) — modifiable via l'API.
 - L'ouverture du détail d'une intervention planifiée depuis l'espace employeur génère son plan (même chemin que la tablette) : c'est une prévisualisation fidèle, assumée.
 
+## Bilinguisme français / portugais brésilien (2026-09-21)
+
+La question 4 de SPEC §12 est définitivement tranchée : l'intervenante est brésilienne et ne parle pas français ; les employeurs ne parlent pas portugais. Architecture retenue :
+
+- **Interface** : la tablette/le téléphone suit la langue de l'appareil (SPEC §6 — un appareil en `pt`/`pt-BR` reçoit l'interface en portugais via `locales/pt.json`, tout autre réglage retombe sur le français) ; l'espace employeur `/admin` reste en français.
+- **Données du catalogue** : colonnes parallèles nullable `nom_pt`, `libelle_pt`, `checklist_pt`, `instructions_pt` (+ `valeurs_pt` dans les cibles de liste, alignées par index sur `valeurs` — le curseur d'alternance travaille toujours sur les valeurs françaises). Repli français quand la traduction manque. L'espace employeur édite les deux langues (champs « … en portugais »).
+- **Base existante** : `npm run db:traduire` (idempotent) complète les champs `*_pt` vides d'une base déployée à partir du catalogue, sans écraser ni le français ni une traduction personnalisée — à lancer une fois après la mise à jour.
+- **Textes libres non traduits** : demandes ponctuelles, messages, commentaires, notes et signalements restent dans la langue de leur auteur — l'application ne traduit pas à la volée (pas de service externe, usage hors ligne visé). Les catégories (motifs, types de signalement) sont elles localisées des deux côtés.
+
+## Téléphone de l'intervenante et PWA (2026-09-21, lot 4 partiellement avancé)
+
+L'intervenante utilise son propre téléphone (réglé en portugais) en plus de la tablette du foyer : l'application est **installable** (manifest + service worker vite-plugin-pwa, icônes maskable, coquille précachée pour le démarrage rapide — SPEC §8). Installation : ouvrir l'URL dans Chrome → « Adicionar à tela inicial ». La session PIN d'un an vaut par appareil. Le reste du lot 4 (file d'écritures hors ligne IndexedDB, mode kiosque de la tablette) reste à faire ; `/api` est volontairement servi réseau-direct d'ici là.
+
 ## Exposition publique (2026-09-07, demande des employeurs)
 
 L'application est publiée sur `https://housekeeping.vv-architech.fr` derrière le nginx du foyer — c'est une divergence assumée avec SPEC §9, qui recommandait un accès distant via Tailscale sans ouverture de port. Garde-fous (cf. `deploy/`) :

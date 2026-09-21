@@ -21,6 +21,7 @@ import { aujourdHui, lireCorps } from '../http.js'
 
 const CreationPieceSchema = z.object({
   nom: z.string().min(1),
+  nom_pt: z.string().nullable().optional(),
   type: TypePieceSchema,
   surface_m2: z.number().positive().nullable().optional(),
   ordre_affichage: z.number().int().optional(),
@@ -43,13 +44,16 @@ const ReactivationSchema = z.object({
 
 const CreationTacheSchema = z.object({
   libelle: z.string().min(1),
+  libelle_pt: z.string().nullable().optional(),
   cadence: CadenceSchema,
   room_id: z.string().nullable().optional(),
   checklist: z.array(z.string()).optional(),
+  checklist_pt: z.array(z.string()).nullable().optional(),
   duree_estimee_min: z.number().positive().nullable().optional(),
   cible_rotative: CibleRotativeSchema.nullable().optional(),
   passage_contraint: z.enum(['A', 'B']).nullable().optional(),
   instructions: z.string().nullable().optional(),
+  instructions_pt: z.string().nullable().optional(),
 })
 
 const ModificationTacheSchema = DefinitionTacheSchema.omit({ id: true }).partial()
@@ -74,6 +78,7 @@ export function routesConfiguration(db: Db): Hono {
     const piece = {
       id: randomUUID(),
       nom: corps.nom,
+      nom_pt: corps.nom_pt ?? null,
       type: corps.type,
       surface_m2: corps.surface_m2 ?? null,
       actif: true,
@@ -160,13 +165,16 @@ export function routesConfiguration(db: Db): Hono {
     const tache = {
       id: randomUUID(),
       libelle: corps.libelle,
+      libelle_pt: corps.libelle_pt ?? null,
       room_id: corps.room_id ?? null,
       checklist: corps.checklist ?? [],
+      checklist_pt: corps.checklist_pt ?? null,
       cadence: corps.cadence,
       duree_estimee_min: corps.duree_estimee_min ?? null,
       cible_rotative: corps.cible_rotative ?? null,
       passage_contraint: corps.passage_contraint ?? null,
       instructions: corps.instructions ?? null,
+      instructions_pt: corps.instructions_pt ?? null,
       actif: true,
     }
     db.insert(schema.taches).values(tache).run()

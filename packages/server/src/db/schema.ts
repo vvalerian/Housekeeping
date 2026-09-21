@@ -25,6 +25,7 @@ import type {
 export const pieces = sqliteTable('pieces', {
   id: text('id').primaryKey(),
   nom: text('nom').notNull(),
+  nom_pt: text('nom_pt'),
   type: text('type').$type<TypePiece>().notNull(),
   surface_m2: real('surface_m2'),
   actif: integer('actif', { mode: 'boolean' }).notNull(),
@@ -38,8 +39,10 @@ export const pieces = sqliteTable('pieces', {
 export const taches = sqliteTable('taches', {
   id: text('id').primaryKey(),
   libelle: text('libelle').notNull(),
+  libelle_pt: text('libelle_pt'),
   room_id: text('room_id').references(() => pieces.id),
   checklist: text('checklist', { mode: 'json' }).$type<string[]>().notNull(),
+  checklist_pt: text('checklist_pt', { mode: 'json' }).$type<string[] | null>(),
   cadence: text('cadence')
     .$type<'chaque_passage' | 'passage_A' | 'passage_B' | 'mensuelle' | 'trimestrielle'>()
     .notNull(),
@@ -47,6 +50,7 @@ export const taches = sqliteTable('taches', {
   cible_rotative: text('cible_rotative', { mode: 'json' }).$type<CibleRotative | null>(),
   passage_contraint: text('passage_contraint').$type<'A' | 'B' | null>(),
   instructions: text('instructions'),
+  instructions_pt: text('instructions_pt'),
   actif: integer('actif', { mode: 'boolean' }).notNull(),
 })
 

@@ -29,19 +29,27 @@ function ModaleEdition({ piece, onFermer }: { piece: PieceDto | null; onFermer: 
   const modifier = useModifierPiece()
   const creer = useCreerPiece()
   const [nom, setNom] = useState(piece?.nom ?? '')
+  const [nomPt, setNomPt] = useState(piece?.nom_pt ?? '')
   const [type, setType] = useState<PieceDto['type']>(piece?.type ?? 'chambre')
   const [surface, setSurface] = useState(piece?.surface_m2?.toString() ?? '')
   const [ordre, setOrdre] = useState(piece?.ordre_affichage.toString() ?? '')
 
   const enregistrer = () => {
     const surface_m2 = surface.trim() === '' ? null : Number(surface)
+    const nom_pt = nomPt.trim() === '' ? null : nomPt.trim()
     if (piece === null) {
-      creer.mutate({ nom, type, surface_m2 }, { onSuccess: onFermer })
+      creer.mutate({ nom, nom_pt, type, surface_m2 }, { onSuccess: onFermer })
     } else {
       modifier.mutate(
         {
           id: piece.id,
-          corps: { nom, type, surface_m2, ordre_affichage: Number(ordre) || piece.ordre_affichage },
+          corps: {
+            nom,
+            nom_pt,
+            type,
+            surface_m2,
+            ordre_affichage: Number(ordre) || piece.ordre_affichage,
+          },
         },
         { onSuccess: onFermer },
       )
@@ -52,6 +60,11 @@ function ModaleEdition({ piece, onFermer }: { piece: PieceDto | null; onFermer: 
     <Modale titre={piece === null ? 'Nouvelle pièce' : `Modifier « ${piece.nom} »`} onFermer={onFermer}>
       <div className="flex flex-col gap-3">
         <Champ label="Nom" value={nom} onChange={(e) => setNom(e.target.value)} />
+        <Champ
+          label="Nom en portugais (affiché à l'intervenante — vide = nom français)"
+          value={nomPt}
+          onChange={(e) => setNomPt(e.target.value)}
+        />
         <Selecteur
           label="Type"
           value={type}

@@ -33,6 +33,12 @@ export type PeriodeInactivite = z.infer<typeof PeriodeInactiviteSchema>
 export const PieceSchema = z.object({
   id: z.string().min(1),
   nom: z.string().min(1),
+  /**
+   * Nom affiché à l'intervenante (portugais brésilien, langue confirmée le
+   * 2026-09-21). `null` = repli sur `nom`. Les données du foyer sont bilingues
+   * fr/pt ; l'espace employeur reste en français.
+   */
+  nom_pt: z.string().nullable(),
   type: TypePieceSchema,
   surface_m2: z.number().positive().nullable(),
   actif: z.boolean(),
@@ -76,17 +82,29 @@ export type Cadence = z.infer<typeof CadenceSchema>
 export const CibleRotativeSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('pieces_vitres') }),
   z.object({ type: z.literal('pieces'), piece_ids: z.array(z.string()).min(1) }),
-  z.object({ type: z.literal('liste'), valeurs: z.array(z.string()).min(2) }),
+  z.object({
+    type: z.literal('liste'),
+    valeurs: z.array(z.string()).min(2),
+    /**
+     * Traductions d'affichage des valeurs, alignées par index sur `valeurs`
+     * (le curseur et l'historique travaillent toujours sur `valeurs`).
+     */
+    valeurs_pt: z.array(z.string()).optional(),
+  }),
 ])
 export type CibleRotative = z.infer<typeof CibleRotativeSchema>
 
 export const DefinitionTacheSchema = z.object({
   id: z.string().min(1),
   libelle: z.string().min(1),
+  /** Libellé pour l'intervenante (pt-BR) ; `null` = repli sur `libelle`. */
+  libelle_pt: z.string().nullable(),
   /** `null` pour les tâches transverses (linge, poubelles…). */
   room_id: z.string().nullable(),
   /** Sous-points affichés en détail, non cochables individuellement. */
   checklist: z.array(z.string()),
+  /** Checklist pour l'intervenante (pt-BR) ; `null` = repli sur `checklist`. */
+  checklist_pt: z.array(z.string()).nullable(),
   cadence: CadenceSchema,
   /** Indicative, jamais affichée à l'intervenante. */
   duree_estimee_min: z.number().positive().nullable(),
@@ -97,6 +115,8 @@ export const DefinitionTacheSchema = z.object({
    */
   passage_contraint: z.enum(['A', 'B']).nullable(),
   instructions: z.string().nullable(),
+  /** Instructions pour l'intervenante (pt-BR) ; `null` = repli sur `instructions`. */
+  instructions_pt: z.string().nullable(),
   actif: z.boolean(),
 })
 export type DefinitionTache = z.infer<typeof DefinitionTacheSchema>

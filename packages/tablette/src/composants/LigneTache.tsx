@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { formaterDateCourte } from '../lib.js'
+import {
+  checklistLocalisee,
+  formaterDateCourte,
+  instructionsLocalisees,
+  libelleInstance,
+} from '../lib.js'
 import type { DefinitionTacheDto, InstanceDto } from '../types.js'
 
 /**
@@ -21,9 +26,11 @@ export function LigneTache({
 }) {
   const { t, i18n } = useTranslation()
   const [detailOuvert, setDetailOuvert] = useState(false)
-  const aDetail =
-    definition !== undefined &&
-    (definition.checklist.length > 0 || definition.instructions !== null)
+  const libelle = libelleInstance(instance, definition, i18n.language)
+  const checklist = definition === undefined ? [] : checklistLocalisee(definition, i18n.language)
+  const instructions =
+    definition === undefined ? null : instructionsLocalisees(definition, i18n.language)
+  const aDetail = checklist.length > 0 || instructions !== null
 
   const coche = (() => {
     switch (instance.statut) {
@@ -44,7 +51,7 @@ export function LigneTache({
         <button
           type="button"
           onClick={onBasculer}
-          aria-label={t('plan.basculer', { tache: instance.libelle })}
+          aria-label={t('plan.basculer', { tache: libelle })}
           className="flex min-h-14 flex-1 items-center gap-3 px-4 py-2 text-left active:bg-slate-50"
         >
           {coche}
@@ -58,7 +65,7 @@ export function LigneTache({
                     : 'text-slate-800'
               }
             >
-              {instance.libelle}
+              {libelle}
             </span>
             <span className="flex flex-wrap gap-2">
               {instance.reportee_depuis !== null && (
@@ -86,7 +93,7 @@ export function LigneTache({
           <button
             type="button"
             onClick={() => setDetailOuvert((ouvert) => !ouvert)}
-            aria-label={t('plan.ouvrirDetail', { tache: instance.libelle })}
+            aria-label={t('plan.ouvrirDetail', { tache: libelle })}
             aria-expanded={detailOuvert}
             className="flex h-14 w-14 shrink-0 items-center justify-center self-center text-xl text-slate-400 active:bg-slate-50"
           >
@@ -96,24 +103,24 @@ export function LigneTache({
         <button
           type="button"
           onClick={onOuvrirMotifs}
-          aria-label={t('plan.ouvrirMotifs', { tache: instance.libelle })}
+          aria-label={t('plan.ouvrirMotifs', { tache: libelle })}
           className="flex h-14 w-14 shrink-0 items-center justify-center self-center rounded-full text-xl active:bg-slate-50"
         >
           ✋
         </button>
       </div>
-      {detailOuvert && aDetail && definition !== undefined && (
+      {detailOuvert && aDetail && (
         <div className="mx-4 mb-3 rounded-xl bg-slate-50 px-4 py-3 text-slate-600">
-          {definition.checklist.length > 0 && (
+          {checklist.length > 0 && (
             <ul className="list-disc space-y-1 pl-5">
-              {definition.checklist.map((point) => (
+              {checklist.map((point) => (
                 <li key={point}>{point}</li>
               ))}
             </ul>
           )}
-          {definition.instructions !== null && (
-            <p className={`italic ${definition.checklist.length > 0 ? 'mt-2' : ''}`}>
-              {definition.instructions}
+          {instructions !== null && (
+            <p className={`italic ${checklist.length > 0 ? 'mt-2' : ''}`}>
+              {instructions}
             </p>
           )}
         </div>

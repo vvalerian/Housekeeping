@@ -4,7 +4,7 @@ import { useAjoutSpontane, usePieces, useTaches, useValiderInstance } from '../a
 import { CartePiece } from '../composants/CartePiece.js'
 import { MenuMotif } from '../composants/MenuMotif.js'
 import { ModalAjout } from '../composants/ModalAjout.js'
-import { grouperParPiece, progression } from '../lib.js'
+import { grouperParPiece, libelleInstance, nomPieceLocalise, progression } from '../lib.js'
 import type { InstanceDto, PlanDuJourDto } from '../types.js'
 
 /**
@@ -18,7 +18,7 @@ export function PlanDuJour({
   plan: PlanDuJourDto
   onCloturer: () => void
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const pieces = usePieces()
   const taches = useTaches()
   const valider = useValiderInstance()
@@ -26,10 +26,14 @@ export function PlanDuJour({
   const [instanceMotifs, setInstanceMotifs] = useState<InstanceDto | null>(null)
   const [ajoutOuvert, setAjoutOuvert] = useState(false)
 
-  const groupes = useMemo(
-    () => grouperParPiece(plan.instances, pieces.data ?? []),
-    [plan.instances, pieces.data],
-  )
+  // Cartes de pièce dans la langue de l'appareil (données bilingues fr/pt).
+  const groupes = useMemo(() => {
+    const piecesLocalisees = (pieces.data ?? []).map((piece) => ({
+      ...piece,
+      nom: nomPieceLocalise(piece, i18n.language),
+    }))
+    return grouperParPiece(plan.instances, piecesLocalisees)
+  }, [plan.instances, pieces.data, i18n.language])
   const definitions = useMemo(
     () => new Map((taches.data ?? []).map((definition) => [definition.id, definition])),
     [taches.data],
@@ -92,6 +96,13 @@ export function PlanDuJour({
 
       {instanceMotifs !== null && (
         <MenuMotif
+          titre={libelleInstance(
+            instanceMotifs,
+            instanceMotifs.task_definition_id === null
+              ? undefined
+              : definitions.get(instanceMotifs.task_definition_id),
+            i18n.language,
+          )}
           instance={instanceMotifs}
           onFermer={() => setInstanceMotifs(null)}
           onValider={({ statut, motif, commentaire }) => {

@@ -34,4 +34,4 @@ et le jeudi, français uniquement.
 
 **Déploiement** : conteneur Docker derrière nginx (TLS + Basic Auth transitoire) — voir [deploy/README.md](deploy/README.md).
 
-État : **lots 1 à 3 livrés** (modèle, seed, moteur testé, API, interface tablette, espace employeur, authentification). Reste le lot 4 : cf. [SPEC.md](SPEC.md) §11.
+État : **lots 1 à 3 livrés et déployés**, interface intervenante **bilingue fr/pt-BR** et **installable** (PWA) sur téléphone. Reste du lot 4 : file d'écritures hors ligne et mode kiosque — cf. [SPEC.md](SPEC.md) §11.

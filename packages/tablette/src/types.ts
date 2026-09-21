@@ -3,6 +3,7 @@
  * typées avec les énumérations du domaine partagé.
  */
 import type {
+  CibleRotative,
   MotifNonFaite,
   OrigineInstance,
   StatutInstance,
@@ -46,14 +47,19 @@ export interface PlanDuJourDto {
 export interface PieceDto {
   id: string
   nom: string
+  nom_pt: string | null
   ordre_affichage: number
 }
 
 export interface DefinitionTacheDto {
   id: string
   libelle: string
+  libelle_pt: string | null
   checklist: string[]
+  checklist_pt: string[] | null
   instructions: string | null
+  instructions_pt: string | null
+  cible_rotative: CibleRotative | null
 }
 
 export interface MessageDto {

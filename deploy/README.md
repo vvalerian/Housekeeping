@@ -95,6 +95,22 @@ git pull
 docker compose up -d --build
 ```
 
+**Mise à jour du 2026-09-21 (bilinguisme)** : après le rebuild, compléter une
+seule fois les traductions pt-BR du catalogue existant (idempotent, ne touche
+que les champs vides) :
+
+```bash
+docker exec housekeeping-app-1 node_modules/.bin/tsx packages/server/src/db/traductions.ts
+```
+
+## Le téléphone de l'intervenante
+
+Sur son téléphone (réglé en portugais — l'interface et le catalogue suivent la
+langue de l'appareil) : ouvrir `https://housekeeping.vv-architech.fr` dans
+Chrome, saisir le code PIN, puis menu ⋮ → **« Adicionar à tela inicial »** :
+l'application s'installe comme une app (icône 🧹, plein écran). La session
+dure un an sur l'appareil.
+
 ## 6. Mot de passe employeur oublié
 
 Aucune route web ne le permet (volontairement) ; on le réinitialise sur le

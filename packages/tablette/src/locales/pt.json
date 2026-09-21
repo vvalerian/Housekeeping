@@ -1,0 +1,95 @@
+{
+  "commun": {
+    "chargement": "Carregando…",
+    "erreurReseau": "O servidor não responde. Verifique o Wi-Fi e tente de novo.",
+    "reessayer": "Tentar de novo",
+    "annuler": "Cancelar",
+    "valider": "Confirmar",
+    "envoyer": "Enviar",
+    "fermer": "Fechar"
+  },
+  "typePassage": {
+    "A": "Serviço 1 — área social, escritórios, banheiro",
+    "B": "Serviço 2 — quartos e banheiro do chuveiro",
+    "exceptionnelle": "Serviço extra"
+  },
+  "accueil": {
+    "aucuneIntervention": "Nenhum serviço previsto para hoje.",
+    "prochaine": "Próximo serviço: {{date}}",
+    "commencer": "Começar",
+    "reprendre": "Continuar o serviço",
+    "terminee": "Serviço concluído. Obrigada!",
+    "messagesTitre": "Recado dos empregadores"
+  },
+  "plan": {
+    "progression": "{{traitees}} de {{total}}",
+    "cloturer": "Resumo e encerramento",
+    "ajouterTache": "Adicionar uma tarefa",
+    "reporteeDepuis": "Adiada desde {{date}}",
+    "demande": "Pedido",
+    "transverses": "Para terminar",
+    "statutFaite": "Feito",
+    "statutPartielle": "Feito em parte",
+    "statutNonFaite": "Não feito",
+    "ouvrirDetail": "Ver os detalhes de « {{tache}} »",
+    "ouvrirMotifs": "Não consegui fazer « {{tache}} »",
+    "basculer": "Marcar « {{tache}} »"
+  },
+  "motifs": {
+    "sousTitre": "O que aconteceu?",
+    "statutNonFaite": "Não feito",
+    "statutPartielle": "Feito em parte",
+    "manque_de_temps": "Faltou tempo",
+    "piece_inaccessible": "Cômodo inacessível",
+    "produit_manquant": "Faltou produto",
+    "non_necessaire": "Não era necessário",
+    "autre": "Outro",
+    "commentaire": "Comentário (opcional)",
+    "remettreAFaire": "Voltar para a lista"
+  },
+  "ajout": {
+    "titre": "Adicionar uma tarefa",
+    "placeholder": "Ex.: regar as plantas da varanda",
+    "ajouter": "Adicionar"
+  },
+  "cloture": {
+    "titre": "Resumo",
+    "faites_one": "{{count}} tarefa feita",
+    "faites_other": "{{count}} tarefas feitas",
+    "partielles_one": "{{count}} tarefa feita em parte",
+    "partielles_other": "{{count}} tarefas feitas em parte",
+    "nonFaites_one": "{{count}} tarefa não feita",
+    "nonFaites_other": "{{count}} tarefas não feitas",
+    "nonCochees_one": "{{count}} tarefa ficou sem marcar",
+    "nonCochees_other": "{{count}} tarefas ficaram sem marcar",
+    "sansMotif": "Sem motivo",
+    "note": "Um recado para os empregadores? (opcional)",
+    "terminer": "Encerrar o serviço",
+    "retourPlan": "Voltar à lista"
+  },
+  "terminee": {
+    "titre": "Serviço encerrado",
+    "merci": "Obrigada, até a próxima!",
+    "retour": "Voltar ao início"
+  },
+  "pin": {
+    "titre": "Código de acesso",
+    "sousTitre": "Digite o código de 4 números",
+    "effacer": "Apagar",
+    "erreur": "Código errado, tente de novo.",
+    "verrou": "Muitas tentativas — espere alguns minutos.",
+    "nonConfigure": "O acesso ainda não foi configurado. Peça aos empregadores para definir o código no espaço deles (página Segurança).",
+    "verifier": "Verificar de novo",
+    "connexion": "Entrando…"
+  },
+  "signaler": {
+    "bouton": "Avisar",
+    "titre": "Avisar sobre…",
+    "casse": "Algo quebrou",
+    "produit_a_racheter": "Produto para comprar",
+    "probleme_technique": "Problema técnico",
+    "autre": "Outra coisa",
+    "placeholder": "Descreva em poucas palavras…",
+    "envoye": "Aviso enviado."
+  }
+}

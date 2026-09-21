@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useCloturer } from '../api.js'
+import { useCloturer, useTaches } from '../api.js'
+import { libelleInstance } from '../lib.js'
 import type { PlanDuJourDto } from '../types.js'
 
 /**
@@ -16,9 +17,14 @@ export function Cloture({
   onRetour: () => void
   onTerminee: () => void
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const cloturer = useCloturer()
+  const taches = useTaches()
   const [note, setNote] = useState('')
+  const definitions = useMemo(
+    () => new Map((taches.data ?? []).map((definition) => [definition.id, definition])),
+    [taches.data],
+  )
 
   const faites = plan.instances.filter((i) => i.statut === 'faite')
   const partielles = plan.instances.filter((i) => i.statut === 'partielle')
@@ -55,7 +61,15 @@ export function Cloture({
           <ul className="mt-4 space-y-2 border-t border-slate-100 pt-4">
             {listeRestes.map((instance) => (
               <li key={instance.id} className="flex flex-wrap items-baseline gap-x-2">
-                <span className="text-slate-800">{instance.libelle}</span>
+                <span className="text-slate-800">
+                  {libelleInstance(
+                    instance,
+                    instance.task_definition_id === null
+                      ? undefined
+                      : definitions.get(instance.task_definition_id),
+                    i18n.language,
+                  )}
+                </span>
                 <span className="text-sm text-slate-500">
                   {instance.statut === 'partielle'
                     ? t('plan.statutPartielle')

@@ -110,11 +110,12 @@ export const CHOIX_FOYER = {
   premier_type_passage: 'A' as 'A' | 'B',
 
   /**
-   * 4) Langue de l'intervenante (SPEC §6) : français uniquement — pas de
-   *    seconde langue à prévoir. i18next reste introduit au lot 2 pour
-   *    l'extraction des chaînes (exigence SPEC §6), avec la seule locale fr.
+   * 4) Langue de l'intervenante (SPEC §6) : portugais brésilien, confirmé le
+   *    2026-09-21 (l'intervenante ne parle pas français). La tablette suit la
+   *    langue de l'appareil (pt → interface et catalogue en portugais, repli
+   *    français) ; l'espace employeur reste en français.
    */
-  langues: ['fr'] as string[],
+  langues: ['fr', 'pt'] as string[],
 }
 
 /**

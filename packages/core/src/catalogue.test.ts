@@ -60,6 +60,25 @@ describe('catalogue initial', () => {
     }
   })
 
+  it('le catalogue est intégralement bilingue fr/pt (intervenante brésilienne)', () => {
+    for (const piece of PIECES_INITIALES) {
+      expect(piece.nom_pt, `nom_pt manquant sur ${piece.id}`).not.toBeNull()
+    }
+    for (const tache of TACHES_INITIALES) {
+      expect(tache.libelle_pt, `libelle_pt manquant sur ${tache.id}`).not.toBeNull()
+      if (tache.checklist.length > 0) {
+        expect(tache.checklist_pt, `checklist_pt manquante sur ${tache.id}`).not.toBeNull()
+        expect(tache.checklist_pt).toHaveLength(tache.checklist.length)
+      }
+      if (tache.instructions !== null) {
+        expect(tache.instructions_pt, `instructions_pt manquantes sur ${tache.id}`).not.toBeNull()
+      }
+      if (tache.cible_rotative?.type === 'liste' && tache.cible_rotative.valeurs_pt !== undefined) {
+        expect(tache.cible_rotative.valeurs_pt).toHaveLength(tache.cible_rotative.valeurs.length)
+      }
+    }
+  })
+
   it('le marquage vitres reflète exactement la configuration', () => {
     const marquees = PIECES_INITIALES.filter((p) => p.inclus_rotation_vitres).map((p) => p.id)
     expect(marquees.sort()).toEqual([...CHOIX_FOYER.pieces_rotation_vitres].sort())

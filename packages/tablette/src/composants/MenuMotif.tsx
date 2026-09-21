@@ -9,10 +9,13 @@ import { Modal } from './Modal.js'
  * motif prédéfini, commentaire facultatif.
  */
 export function MenuMotif({
+  titre,
   instance,
   onValider,
   onFermer,
 }: {
+  /** Libellé localisé de la tâche (langue de l'appareil). */
+  titre: string
   instance: InstanceDto
   onValider: (validation: {
     statut: 'non_faite' | 'partielle' | 'a_faire'
@@ -44,7 +47,7 @@ export function MenuMotif({
   )
 
   return (
-    <Modal titre={instance.libelle} onFermer={onFermer}>
+    <Modal titre={titre} onFermer={onFermer}>
       <div className="flex gap-3">
         {segment('non_faite', t('motifs.statutNonFaite'))}
         {segment('partielle', t('motifs.statutPartielle'))}

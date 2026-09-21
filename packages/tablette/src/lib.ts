@@ -2,7 +2,12 @@
  * Logique d'affichage pure (testée unitairement, sans React) : groupement du
  * plan par carte de pièce (SPEC §6) et progression.
  */
-import type { InstanceDto, PieceDto } from './types.js'
+import type { DefinitionTacheDto, InstanceDto, PieceDto } from './types.js'
+
+/** `true` quand l'appareil est réglé en portugais (données `*_pt` affichées). */
+export function estPortugais(langue: string): boolean {
+  return langue.toLowerCase().startsWith('pt')
+}
 
 export interface GroupePlan {
   cle: string
@@ -75,4 +80,53 @@ export function formaterDateCourte(dateIso: string, locale: string): string {
 /** Date du jour au sens local de l'appareil (AAAA-MM-JJ). */
 export function dateDuJour(): string {
   return new Date().toLocaleDateString('en-CA')
+}
+
+// ---------------------------------------------------------------------------
+// Localisation des DONNÉES du catalogue (bilinguisme fr/pt, repli français) —
+// les champs `*_pt` viennent de la base, les textes libres (demandes,
+// commentaires) restent dans la langue de leur auteur.
+// ---------------------------------------------------------------------------
+
+export function nomPieceLocalise(piece: PieceDto, langue: string): string {
+  return estPortugais(langue) ? (piece.nom_pt ?? piece.nom) : piece.nom
+}
+
+/**
+ * Libellé d'une instance : celui de sa définition dans la langue demandée
+ * (recomposé avec la cible pour les sous-rotations de liste, ex. « Interior
+ * do forno ou do micro-ondas — Forno ») ; sans définition (demande
+ * ponctuelle, ajout spontané), l'instantané `libelle` tel qu'écrit.
+ */
+export function libelleInstance(
+  instance: InstanceDto,
+  definition: DefinitionTacheDto | undefined,
+  langue: string,
+): string {
+  if (definition === undefined) return instance.libelle
+  const pt = estPortugais(langue)
+  const base = pt ? (definition.libelle_pt ?? definition.libelle) : definition.libelle
+  if (instance.cible_resolue !== null && definition.cible_rotative?.type === 'liste') {
+    const { valeurs, valeurs_pt } = definition.cible_rotative
+    const index = valeurs.indexOf(instance.cible_resolue)
+    const cible =
+      pt && index !== -1 && valeurs_pt?.[index] !== undefined
+        ? valeurs_pt[index]
+        : instance.cible_resolue
+    return `${base} — ${cible}`
+  }
+  return base
+}
+
+export function checklistLocalisee(definition: DefinitionTacheDto, langue: string): string[] {
+  return estPortugais(langue) ? (definition.checklist_pt ?? definition.checklist) : definition.checklist
+}
+
+export function instructionsLocalisees(
+  definition: DefinitionTacheDto,
+  langue: string,
+): string | null {
+  return estPortugais(langue)
+    ? (definition.instructions_pt ?? definition.instructions)
+    : definition.instructions
 }

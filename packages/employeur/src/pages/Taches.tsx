@@ -16,22 +16,31 @@ function ModaleEdition({ tache, onFermer }: { tache: TacheDto | null; onFermer: 
   const modifier = useModifierTache()
   const creer = useCreerTache()
   const [libelle, setLibelle] = useState(tache?.libelle ?? '')
+  const [libellePt, setLibellePt] = useState(tache?.libelle_pt ?? '')
   const [cadence, setCadence] = useState<TacheDto['cadence']>(tache?.cadence ?? 'chaque_passage')
   const [roomId, setRoomId] = useState(tache?.room_id ?? '')
   const [checklist, setChecklist] = useState((tache?.checklist ?? []).join('\n'))
+  const [checklistPt, setChecklistPt] = useState((tache?.checklist_pt ?? []).join('\n'))
   const [instructions, setInstructions] = useState(tache?.instructions ?? '')
+  const [instructionsPt, setInstructionsPt] = useState(tache?.instructions_pt ?? '')
   const [duree, setDuree] = useState(tache?.duree_estimee_min?.toString() ?? '')
 
   const enregistrer = () => {
-    const corps = {
-      libelle,
-      cadence,
-      room_id: roomId === '' ? null : roomId,
-      checklist: checklist
+    const lignes = (texte: string) =>
+      texte
         .split('\n')
         .map((ligne) => ligne.trim())
-        .filter((ligne) => ligne !== ''),
+        .filter((ligne) => ligne !== '')
+    const checklistPtLignes = lignes(checklistPt)
+    const corps = {
+      libelle,
+      libelle_pt: libellePt.trim() === '' ? null : libellePt.trim(),
+      cadence,
+      room_id: roomId === '' ? null : roomId,
+      checklist: lignes(checklist),
+      checklist_pt: checklistPtLignes.length === 0 ? null : checklistPtLignes,
       instructions: instructions.trim() === '' ? null : instructions.trim(),
+      instructions_pt: instructionsPt.trim() === '' ? null : instructionsPt.trim(),
       duree_estimee_min: duree.trim() === '' ? null : Number(duree),
     }
     if (tache === null) creer.mutate(corps, { onSuccess: onFermer })
@@ -42,6 +51,11 @@ function ModaleEdition({ tache, onFermer }: { tache: TacheDto | null; onFermer: 
     <Modale titre={tache === null ? 'Nouvelle tâche' : `Modifier « ${tache.libelle} »`} onFermer={onFermer}>
       <div className="flex flex-col gap-3">
         <Champ label="Libellé" value={libelle} onChange={(e) => setLibelle(e.target.value)} />
+        <Champ
+          label="Libellé en portugais (affiché à l'intervenante — vide = français)"
+          value={libellePt}
+          onChange={(e) => setLibellePt(e.target.value)}
+        />
         <div className="grid grid-cols-2 gap-3">
           <Selecteur
             label="Cadence"
@@ -66,10 +80,22 @@ function ModaleEdition({ tache, onFermer }: { tache: TacheDto | null; onFermer: 
           onChange={(e) => setChecklist(e.target.value)}
         />
         <ZoneTexte
+          label="Checklist en portugais (un point par ligne — vide = français)"
+          rows={3}
+          value={checklistPt}
+          onChange={(e) => setChecklistPt(e.target.value)}
+        />
+        <ZoneTexte
           label="Instructions (produit, précaution…)"
           rows={2}
           value={instructions}
           onChange={(e) => setInstructions(e.target.value)}
+        />
+        <ZoneTexte
+          label="Instructions en portugais (vide = français)"
+          rows={2}
+          value={instructionsPt}
+          onChange={(e) => setInstructionsPt(e.target.value)}
         />
         <Champ
           label="Durée indicative (minutes — jamais montrée à l'intervenante)"

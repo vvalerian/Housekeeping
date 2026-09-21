@@ -99,7 +99,7 @@ export const useModifierPiece = () =>
     ['pieces'],
   )
 export const useCreerPiece = () =>
-  useAction<{ nom: string; type: PieceDto['type']; surface_m2?: number | null }>(
+  useAction<{ nom: string; nom_pt?: string | null; type: PieceDto['type']; surface_m2?: number | null }>(
     (corps) => ({ chemin: '/pieces', corps }),
     ['pieces'],
   )

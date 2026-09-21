@@ -24,6 +24,7 @@ export interface EtatAuthDto {
 export interface PieceDto {
   id: string
   nom: string
+  nom_pt: string | null
   type: TypePiece
   surface_m2: number | null
   actif: boolean
@@ -35,13 +36,16 @@ export interface PieceDto {
 export interface TacheDto {
   id: string
   libelle: string
+  libelle_pt: string | null
   room_id: string | null
   checklist: string[]
+  checklist_pt: string[] | null
   cadence: Cadence
   duree_estimee_min: number | null
   cible_rotative: CibleRotative | null
   passage_contraint: 'A' | 'B' | null
   instructions: string | null
+  instructions_pt: string | null
   actif: boolean
 }
 
