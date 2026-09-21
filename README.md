@@ -30,7 +30,8 @@ Les quatre questions ouvertes de la spec (draps, rotation des vitres, jours
 d'intervention, langue de l'intervenante) sont **tranchées** et regroupées dans
 le bloc `CHOIX_FOYER` de `packages/core/src/configuration.ts` : draps sur
 l'ensemble des lits (passage B), vitres sur huit pièces, interventions le lundi
-et le jeudi, français uniquement.
+et le jeudi, intervenante en portugais brésilien (données et interface
+bilingues, repli français).
 
 **Déploiement** : conteneur Docker derrière nginx (TLS + Basic Auth transitoire) — voir [deploy/README.md](deploy/README.md).
 
